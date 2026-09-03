@@ -7,6 +7,11 @@ const NAV_ITEMS = [
   { href: '/about', label: 'About Us' },
   { href: '/services', label: 'Services' },
   { href: '/projects', label: 'Projects' },
+  {
+    href: 'https://construction-consortium-pchcc.blogspot.com/p/pchcc-resources.html',
+    label: 'Resources',
+    external: true,
+  },
 ];
 
 export default function Layout({ children, title = 'pchcc.com.ph', description = 'Pasig City Hall Construction Consortium (PCHCC)' }) {
@@ -61,12 +66,23 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
                   <ul className="navbar-nav">
                     {NAV_ITEMS.map((item) => (
                       <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={`nav-link${isActive(item.href) ? ' active' : ''}`}
-                        >
-                          {item.label}
-                        </Link>
+                        {item.external ? (
+                          <a
+                            href={item.href}
+                            className="nav-link"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {item.label}
+                          </a>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            className={`nav-link${isActive(item.href) ? ' active' : ''}`}
+                          >
+                            {item.label}
+                          </Link>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -162,7 +178,11 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
             </div>
 
             <div className="social-bx">
-              <a href="#" target="_blank" rel="noreferrer">
+              <a
+                href="https://www.facebook.com/ConstructionConsortium"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <figure>
                   <img src="/images/social-ic1.svg" alt="Facebook" />
                 </figure>
