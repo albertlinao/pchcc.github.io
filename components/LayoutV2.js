@@ -4,12 +4,22 @@ import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 const NAV_ITEMS = [
-  { href: '/about', label: 'About Us' },
-  { href: '/services', label: 'Services' },
-  { href: '/projects', label: 'Projects' },
+  { href: '/v2/about', label: 'About Us' },
+  { href: '/v2/services', label: 'Services' },
+  { href: '/v2/projects', label: 'Projects' },
+  {
+    href: 'https://construction-consortium-pchcc.blogspot.com/?view=magazine',
+    label: 'News',
+    external: true,
+  },
+  {
+    href: 'https://construction-consortium-pchcc.blogspot.com/p/pchcc-resources.html',
+    label: 'Resources',
+    external: true,
+  },
 ];
 
-export default function Layout({ children, title = 'pchcc.com.ph', description = 'Pasig City Hall Construction Consortium (PCHCC)' }) {
+export default function LayoutV2({ children, title = 'pchcc.com.ph', description = 'Pasig City Hall Construction Consortium (PCHCC)' }) {
   const router = useRouter();
   const [navOpen, setNavOpen] = useState(false);
 
@@ -22,8 +32,8 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
   }, [router.events]);
 
   const isActive = (path) => {
-    if (path === '/') {
-      return router.pathname === '/';
+    if (path === '/v2') {
+      return router.pathname === '/v2';
     }
     return router.pathname.startsWith(path);
   };
@@ -43,7 +53,7 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
         <header>
           <div className="container">
             <nav className="navbar navbar-expand-lg navbar-light">
-              <Link href="/" className="navbar-brand">
+              <Link href="/v2" className="navbar-brand">
                 <img src="/images/logo@2x.png" alt="Pasig City Hall Construction Consortium logo" />
               </Link>
               <button
@@ -61,12 +71,23 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
                   <ul className="navbar-nav">
                     {NAV_ITEMS.map((item) => (
                       <li key={item.href}>
-                        <Link
-                          href={item.href}
-                          className={`nav-link${isActive(item.href) ? ' active' : ''}`}
-                        >
-                          {item.label}
-                        </Link>
+                        {item.external ? (
+                          <a
+                            href={item.href}
+                            className="nav-link"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {item.label}
+                          </a>
+                        ) : (
+                          <Link
+                            href={item.href}
+                            className={`nav-link${isActive(item.href) ? ' active' : ''}`}
+                          >
+                            {item.label}
+                          </Link>
+                        )}
                       </li>
                     ))}
                   </ul>
@@ -107,6 +128,8 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
                           </figure>
                           <p>
                             Email <a href="mailto:info@pchcc.com.ph">info@pchcc.com.ph</a>
+                            <br />
+                            <a href="mailto:comms-team@pchcc.com.ph">comms-team@pchcc.com.ph</a>
                           </p>
                         </div>
                       </div>
@@ -128,13 +151,13 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
 
                         <ul>
                           <li>
-                            <Link href="/about">About Us</Link>
+                            <Link href="/v2/about">About Us</Link>
                           </li>
                           <li>
-                            <Link href="/services">Services</Link>
+                            <Link href="/v2/services">Services</Link>
                           </li>
                           <li>
-                            <Link href="/projects">Projects</Link>
+                            <Link href="/v2/projects">Projects</Link>
                           </li>
                         </ul>
                       </div>
@@ -162,7 +185,11 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
             </div>
 
             <div className="social-bx">
-              <a href="#" target="_blank" rel="noreferrer">
+              <a
+                href="https://www.facebook.com/ConstructionConsortium"
+                target="_blank"
+                rel="noreferrer"
+              >
                 <figure>
                   <img src="/images/social-ic1.svg" alt="Facebook" />
                 </figure>
