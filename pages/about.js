@@ -3,39 +3,34 @@ import Layout from '../components/Layout';
 export default function AboutPage() {
   const timelineEvents = [
     {
-      date: 'July 2023',
-      description: 'City council approves the project in a vote of 15-3-3',
-      isComplete: true,
-    },
-    {
-      date: 'September 2023',
+      date: 'JANUARY 13, 2025',
       description:
-        'BTB Execom and PBAC technical working group conducts a site visit in the new Pasig City Hall',
+        'The Construction Contract for the Design and Build Services (Demolition of existing structures within Pasig City Hall Compound and Construction of the New Pasig City Hall) at Caruncho Avenue., Brgy. San Nicolas, Pasig City, under ITB No: PB-04-03-2024-07, was signed by the representatives of the City Government of Pasig and the Pasig City Hall Construction Consortium',
       isComplete: true,
     },
     {
-      date: 'November 2023',
-      description: 'PBAC declares the PCHCC as the winning bidder for the Pasig City Hall project',
+      date: 'JANUARY 30, 2025',
+      description: 'The City Government of Pasig released the Notice to Proceed to PCHCC',
       isComplete: true,
     },
     {
-      date: 'December 2023',
-      description: 'Notice of Award received by PCHCC',
+      date: 'APRIL 24, 2025',
+      description: 'The City Government of Pasig turned over the Pasig City Hall Main Building to PCHCC',
       isComplete: true,
     },
     {
-      date: 'December 2023',
-      description: 'Groundbreaking of the new Pasig City Hall',
+      date: 'OCTOBER 15, 2025',
+      description: 'Groundbreaking and Capsule-Laying Ceremony',
       isComplete: true,
     },
     {
-      date: 'January 2024',
-      description: 'Relocation of flagpole to within the perimeter of the new Pasig City Hall',
+      date: 'FEBRUARY 14, 2026',
+      description: 'Ceremonial First Concrete Pour',
       isComplete: true,
     },
     {
-      date: 'October 15, 2025',
-      description: 'Groundbreaking.',
+      date: 'JUNE 15, 2026',
+      description: 'Topping Off Ceremony',
       isComplete: true,
     },
   ];
@@ -45,7 +40,7 @@ export default function AboutPage() {
       <section className="inner-banner-wrp">
         <div className="container">
           <div className="inner-banner-block">
-            <h1>Who We Are?</h1>
+            <h1>Who We Are</h1>
           </div>
         </div>
       </section>
@@ -169,7 +164,6 @@ export default function AboutPage() {
           </div>
 
           <div className="timeline">
-            <span className="timeline-label timeline-label-start timeline-label-complete">PROJECT START</span>
             {timelineEvents.map((event, index) => (
               <div
                 key={`${event.date}-${index}`}
@@ -183,7 +177,6 @@ export default function AboutPage() {
                 </div>
               </div>
             ))}
-            <span className="timeline-label timeline-label-end timeline-label-incomplete">PROJECT END</span>
           </div>
         </div>
       </section>
