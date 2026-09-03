@@ -8,6 +8,11 @@ const NAV_ITEMS = [
   { href: '/services', label: 'Services' },
   { href: '/projects', label: 'Projects' },
   {
+    href: 'https://construction-consortium-pchcc.blogspot.com/?view=magazine',
+    label: 'News',
+    external: true,
+  },
+  {
     href: 'https://construction-consortium-pchcc.blogspot.com/p/pchcc-resources.html',
     label: 'Resources',
     external: true,
