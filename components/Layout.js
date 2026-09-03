@@ -128,6 +128,8 @@ export default function Layout({ children, title = 'pchcc.com.ph', description =
                           </figure>
                           <p>
                             Email <a href="mailto:info@pchcc.com.ph">info@pchcc.com.ph</a>
+                            <br />
+                            <a href="mailto:comms-team@pchcc.com.ph">comms-team@pchcc.com.ph</a>
                           </p>
                         </div>
                       </div>
