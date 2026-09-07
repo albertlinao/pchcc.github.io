@@ -19,11 +19,9 @@
  * JPEGs are served. Keep them wherever you like.
  */
 
-import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, parse } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-
-import sharp from 'sharp';
 
 import { TIMELINE_EVENTS, eventMonth } from '../components/timelineEvents.mjs';
 
@@ -43,6 +41,30 @@ const die = (...lines) => {
   console.error(lines.join('\n'));
   process.exit(1);
 };
+
+/**
+ * Loaded here rather than imported at the top of the file. A static import is
+ * resolved before any of this runs, so a missing install would crash with a
+ * module-resolution stack trace before the usage message or any of the checks
+ * below could print.
+ */
+async function loadSharp() {
+  try {
+    return (await import('sharp')).default;
+  } catch (error) {
+    if (error.code === 'ERR_MODULE_NOT_FOUND' && /sharp/.test(error.message)) {
+      die(
+        'Photos cannot be converted: sharp is not installed.',
+        '',
+        '  npm install',
+        '',
+        'It is a devDependency, so a checkout made before it was added will not',
+        'have it until you install again.',
+      );
+    }
+    throw error;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Inputs
@@ -106,6 +128,7 @@ if (unplaceable.length > 0) {
 // Convert
 // ---------------------------------------------------------------------------
 
+const sharp = await loadSharp();
 const existing = (await import(pathToFileURL(DATA).href)).default;
 /** A crop already recorded for this photo, so re-running keeps it. */
 const cropFor = (file) =>

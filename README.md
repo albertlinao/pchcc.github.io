@@ -108,6 +108,7 @@ clicking opens a viewer — arrow keys step, `Esc` closes, thumbnails jump.
 ### Adding new photos
 
 ```bash
+npm install                          # first time, or after pulling
 npm run photos -- ~/Downloads/*.png
 ```
 
