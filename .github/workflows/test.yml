@@ -1,8 +1,10 @@
 name: tests
 
 on:
+  # Pushes to main, plus every pull request. Branch pushes are covered by the
+  # PR run, so listing '**' here would only duplicate each check.
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
 
 jobs:
