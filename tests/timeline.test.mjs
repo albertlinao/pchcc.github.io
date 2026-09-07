@@ -8,7 +8,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -67,6 +67,24 @@ test('media items are usable: a src, and an alt on every image', () => {
       }
     }
   }
+});
+
+test('every media file referenced actually exists', () => {
+  // A typo or a photo that was never committed would otherwise reach the
+  // client as a broken image on staging, which is worse than a placeholder.
+  const missing = [];
+  for (const event of TIMELINE_EVENTS) {
+    for (const item of mediaOf(event)) {
+      for (const path of [item.src, item.poster].filter((p) => p?.startsWith('/'))) {
+        if (!existsSync(join(REPO, 'public', path))) missing.push(`${event.date}: ${path}`);
+      }
+    }
+  }
+  assert.deepEqual(
+    missing,
+    [],
+    `these files are referenced but not in public/:\n  ${missing.join('\n  ')}`,
+  );
 });
 
 test('an event with no media keeps the camera placeholder', () => {
