@@ -48,6 +48,11 @@ npm run publish:docs   # next build, then out/ -> docs/
 npm test
 ```
 
+`publish:docs` also writes each page a second time as `<name>/index.html`,
+so both `/v2` and `/v2/` answer. `next export` writes only `v2.html`, and
+GitHub Pages resolves a trailing slash to `v2/index.html` — which meant
+`pchcc.com.ph/v2/` returned a 404 while `pchcc.com.ph/v2` worked.
+
 Commit the `docs/` diff along with the source change that caused it. A
 source change that is not rebuilt does not reach the site, and
 `tests/timeline.test.mjs` fails when the two disagree.

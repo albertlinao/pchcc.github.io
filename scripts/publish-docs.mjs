@@ -9,8 +9,8 @@
  * afterwards: the export is the deliverable and belongs in its own commit.
  */
 
-import { cpSync, existsSync, rmSync } from 'node:fs';
-import { join } from 'node:path';
+import { cpSync, copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { join, parse } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '..');
@@ -33,4 +33,38 @@ for (const required of ['CNAME', '.nojekyll']) {
 
 rmSync(DOCS, { recursive: true, force: true });
 cpSync(OUT, DOCS, { recursive: true });
-console.log('docs/ replaced from out/');
+
+/**
+ * Serve every page at both /about and /about/.
+ *
+ * next export writes about.html, and GitHub Pages resolves /about to it. It
+ * resolves /about/ to about/index.html instead, which the export never wrote —
+ * so a trailing slash 404s. That bites hardest on /v2/, where the directory
+ * does exist (holding the pages beneath it) but has no index, and typing the
+ * bare section URL is the natural thing to do.
+ *
+ * Copying each page to <name>/index.html covers the other form. Nothing about
+ * the pages or their links changes.
+ */
+function addTrailingSlashCopies(dir) {
+  let added = 0;
+  for (const entry of readdirSync(dir)) {
+    const path = join(dir, entry);
+    if (statSync(path).isDirectory()) {
+      added += addTrailingSlashCopies(path);
+      continue;
+    }
+    const { name, ext } = parse(entry);
+    // 404.html is served by GitHub Pages itself, and index.html is already
+    // the directory form.
+    if (ext !== '.html' || name === 'index' || name === '404') continue;
+    const target = join(dir, name);
+    mkdirSync(target, { recursive: true });
+    copyFileSync(path, join(target, 'index.html'));
+    added++;
+  }
+  return added;
+}
+
+const copies = addTrailingSlashCopies(DOCS);
+console.log(`docs/ replaced from out/ (${copies} pages also served with a trailing slash)`);

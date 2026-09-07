@@ -67,6 +67,26 @@ test('every page loads the site stylesheets', () => {
   }
 });
 
+test('every page answers with and without a trailing slash', () => {
+  // next export writes about.html and GitHub Pages resolves /about to it, but
+  // resolves /about/ to about/index.html — which the export never wrote, so a
+  // trailing slash 404s. It bit /v2/ hardest: that directory exists, holding
+  // the pages beneath it, but had no index. publish-docs writes both forms.
+  const missing = [];
+  for (const route of routes) {
+    if (route === '/' || !hasChrome(route)) continue;
+    const bare = `${route.slice(1)}.html`;
+    const slashed = `${route.slice(1)}/index.html`;
+    if (!site.hasAsset(bare)) missing.push(`${route} needs ${bare}`);
+    if (!site.hasAsset(slashed)) missing.push(`${route}/ needs ${slashed}`);
+  }
+  assert.deepEqual(
+    missing,
+    [],
+    `these URL forms would 404 — run npm run publish:docs:\n  ${missing.join('\n  ')}`,
+  );
+});
+
 test('every external link opens in a new tab with rel=noreferrer', () => {
   const unsafe = [];
   for (const route of routes) {
