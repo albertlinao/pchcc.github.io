@@ -113,12 +113,15 @@ flat graphics; for photographs it produces files an order of magnitude
 larger than JPEG at no visible benefit. The first batch was 30 MB for five
 frames, which would have been a 30 MB download on the About page.
 
-Do not commit originals. Put them in `originals/timeline/` (git-ignores it)
-and run:
+Do not commit originals. Point the script at them wherever they are:
 
 ```bash
-npm run images
+npm run images -- ~/Downloads/*.png
 ```
+
+With no arguments it reads `originals/timeline/`, which is git-ignored. It
+prints the `media` entries to paste into `components/timelineEvents.mjs`, so
+filenames do not have to be retyped — that is where typos come from.
 
 That writes two JPEGs per original into `public/images/timeline/`:
 
