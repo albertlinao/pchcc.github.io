@@ -212,12 +212,24 @@ export function hasClass(attrs, name) {
   return (attrs.class ?? '').split(/\s+/).includes(name);
 }
 
-/** Every `src="..."` in the document (scripts, images). */
-export function sources(html) {
+/**
+ * Every URL the browser must fetch for the page to render as intended.
+ *
+ * `src` and `poster` anywhere, plus `href` on any non-anchor tag. That last
+ * part matters: the stylesheets and the favicon are `<link href>`, so a
+ * sweep of `src` attributes and anchors — which is what this used to be —
+ * misses them entirely, and an export that dropped style.css would pass.
+ */
+export function assetRefs(html) {
   const out = [];
-  const re = /\ssrc="([^"]*)"/g;
+  for (const pattern of [/\ssrc="([^"]*)"/g, /\sposter="([^"]*)"/g]) {
+    let m;
+    while ((m = pattern.exec(html)) !== null) out.push(m[1]);
+  }
+  // <link>, <base>, <use> … but not <a>, whose hrefs are navigation.
+  const linked = /<(?!a[\s>])[a-zA-Z][a-zA-Z0-9-]*\b[^>]*?\shref="([^"]*)"/g;
   let m;
-  while ((m = re.exec(html)) !== null) out.push(m[1]);
+  while ((m = linked.exec(html)) !== null) out.push(m[1]);
   return out;
 }
 

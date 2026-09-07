@@ -20,7 +20,7 @@ import {
   navLinks,
   realSite,
   resolves,
-  sources,
+  assetRefs,
 } from './lib/site.mjs';
 
 const site = realSite();
@@ -41,16 +41,30 @@ test('every internal link resolves to a file the site can serve', () => {
   assert.deepEqual(broken, [], `broken links:\n  ${broken.join('\n  ')}`);
 });
 
-test('every script and image source resolves', () => {
+test('every stylesheet, script, image and favicon resolves', () => {
+  // Not just <img src> and <script src>: the stylesheets and the favicon are
+  // <link href>, and losing style.css renders every page unstyled while
+  // leaving the markup — and any anchor-only check — perfectly valid.
   const missing = [];
   for (const route of routes) {
-    for (const src of sources(site.pages.get(route))) {
-      const c = classify(src);
+    for (const ref of assetRefs(site.pages.get(route))) {
+      const c = classify(ref);
       if (c.kind !== 'internal') continue;
-      if (!resolves(site, c.path)) missing.push(`${route} -> ${src}`);
+      if (!resolves(site, c.path)) missing.push(`${route} -> ${ref}`);
     }
   }
   assert.deepEqual(missing, [], `missing assets:\n  ${missing.join('\n  ')}`);
+});
+
+test('every page loads the site stylesheets', () => {
+  // A build that silently stopped emitting these would still pass the
+  // resolution check above, because there would be nothing left to resolve.
+  for (const route of chromeRoutes) {
+    const refs = assetRefs(site.pages.get(route));
+    for (const sheet of ['/css/style.css', '/css/responsive.css']) {
+      assert.ok(refs.includes(sheet), `${route} does not load ${sheet}`);
+    }
+  }
 });
 
 test('every external link opens in a new tab with rel=noreferrer', () => {
