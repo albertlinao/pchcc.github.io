@@ -6,9 +6,10 @@ npm test
 
 No dependencies — Node 18+ and its built-in test runner.
 
-These read the exported HTML in `docs/` the way GitHub Pages serves it
-(`/about` → `docs/about.html`). There is no application source in this repo,
-so the shipped files are the only thing there is to test.
+Most of these read the exported HTML in `docs/` the way GitHub Pages serves
+it (`/about` → `docs/about.html`), because the shipped files are all there
+is to test. `timeline.test.mjs` is the exception: it covers the component
+staged in `source/timeline/`, which is where a React change has to land.
 
 ## The two phases
 
@@ -25,6 +26,7 @@ itself over automatically.
 | `preview.test.mjs` | runs | skips |
 | `promotion.test.mjs` — simulated | runs | skips |
 | `promotion.test.mjs` — real | skips | runs |
+| `timeline.test.mjs` | runs | runs |
 
 **`navigation.test.mjs`** — holds in both phases. Every internal link and asset
 resolves; the header nav is present and complete on every page; the `active`
@@ -43,6 +45,13 @@ sitting dormant until the day they matter; and against the real `docs/` tree
 the moment `/v2` is gone. After approval: no `/v2` page is served, nothing
 links to `/v2`, no `/v2` files remain, every expected route is reachable by
 clicking from the home page, and the nav matches the approved design.
+
+**`timeline.test.mjs`** — the About-page timeline contract, against
+`source/timeline/`. Card order is photo, then date, then caption; the date
+pill is in the flow rather than pinned to the centre rail; every event
+carries a media list; an event with no media keeps a non-clickable
+placeholder; the viewer handles `Esc` and the arrow keys; and the prototype
+is not stale. See `source/README.md`.
 
 ## Promotion is a rebuild, not a file move
 

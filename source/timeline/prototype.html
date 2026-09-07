@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Timeline preview — PCHCC About page</title>
+<style>
+body { margin: 0; font-family: "DM Sans", system-ui, sans-serif; color: #111; background: #fff; }
+.wrap { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 4rem; }
+.note { max-width: 940px; margin: 0 auto 1rem; padding: .85rem 1.1rem; border-left: 4px solid #2456c8;
+        background: #eef3fc; font-size: .88rem; line-height: 1.55; color: #24365e; }
+.note code { background: #dce6f8; padding: .1rem .3rem; border-radius: 3px; }
+h2.titlebar { text-align: center; font-size: 2rem; margin: 0 0 .5rem; }
+h2.titlebar span { color: #2456c8; }
+.tl-subhead {
+          text-align: center;
+          margin: 2.5rem 0 0;
+          color: #111;
+          font-size: 1.4rem;
+          font-weight: 700;
+        }
+        .tl {
+          position: relative;
+          max-width: 940px;
+          margin: 1rem auto 0;
+          padding: 1.5rem 0 1rem;
+        }
+        .tl::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 50%;
+          width: 38px;
+          transform: translateX(-50%);
+          border: 4px solid #1c3f9c;
+          border-radius: 19px;
+          z-index: 0;
+        }
+        .tl-row {
+          position: relative;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+        .tl-row + .tl-row {
+          margin-top: 2.75rem;
+        }
+        .tl-combo {
+          grid-column: 1;
+          justify-self: end;
+          margin-right: 24px;
+          width: min(380px, 100%);
+          display: flex;
+          flex-direction: column;
+          gap: 0.9rem;
+          z-index: 1;
+        }
+        .tl-row:nth-child(even) .tl-combo {
+          grid-column: 2;
+          justify-self: start;
+          margin-right: 0;
+          margin-left: 24px;
+        }
+        .tl-media {
+          align-self: flex-end;
+          width: 200px;
+          height: 200px;
+          position: relative;
+          padding: 0;
+          border: 0;
+          background: none;
+          display: block;
+        }
+        .tl-pill {
+          align-self: flex-end;
+          white-space: nowrap;
+          background: #2456c8;
+          color: #fff;
+          border-radius: 999px;
+          padding: 0.42rem 1.15rem;
+          font-size: 0.82rem;
+          font-weight: 600;
+        }
+        .tl-row:nth-child(even) .tl-media,
+        .tl-row:nth-child(even) .tl-pill {
+          align-self: flex-start;
+        }
+        .tl-media img,
+        .tl-media video,
+        .tl-media-ph {
+          display: block;
+          width: 100%;
+          height: 100%;
+          border-radius: 50%;
+          object-fit: cover;
+          box-shadow: 0 0 0 4px #cfe0f7;
+        }
+        button.tl-media {
+          cursor: pointer;
+          border-radius: 50%;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        button.tl-media:hover,
+        button.tl-media:focus-visible {
+          transform: scale(1.03);
+        }
+        button.tl-media:focus-visible {
+          outline: 3px solid #1c3f9c;
+          outline-offset: 4px;
+        }
+        .tl-media-badge {
+          position: absolute;
+          right: 6px;
+          bottom: 6px;
+          min-width: 30px;
+          height: 30px;
+          padding: 0 0.5rem;
+          border-radius: 999px;
+          background: #1c3f9c;
+          color: #fff;
+          font-size: 0.78rem;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.25rem;
+          box-shadow: 0 0 0 3px #fff;
+        }
+        .tl-media-play {
+          position: absolute;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none;
+        }
+        .tl-media-play span {
+          width: 54px;
+          height: 54px;
+          border-radius: 50%;
+          background: rgba(28, 63, 156, 0.85);
+          color: #fff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 1.1rem;
+          padding-left: 4px;
+        }
+        .tl-media-ph {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.3rem;
+          background: #e8eff9;
+          color: #7f9bc4;
+        }
+        .tl-media-icon {
+          font-size: 2rem;
+          line-height: 1;
+        }
+        .tl-media-note {
+          font-size: 0.72rem;
+          letter-spacing: 0.04em;
+          text-transform: uppercase;
+        }
+        .tl-caption p {
+          margin: 0;
+          color: #000;
+          line-height: 1.55;
+          font-size: 0.95rem;
+        }
+        .tl-caption strong {
+          color: #000;
+          font-weight: 700;
+        }
+
+        .tl-modal {
+          position: fixed;
+          inset: 0;
+          z-index: 1000;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 1.5rem;
+          background: rgba(6, 13, 30, 0.94);
+        }
+        .tl-modal-panel {
+          position: relative;
+          width: min(960px, 100%);
+          max-height: 100%;
+          /* Room for the close button, and a scrollbar rather than a clipped
+             panel when a tall image meets a short window. */
+          padding-top: 3.25rem;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 0.9rem;
+        }
+        .tl-modal-stage {
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 0;
+        }
+        .tl-modal-stage img,
+        .tl-modal-stage video {
+          max-width: 100%;
+          max-height: 60vh;
+          border-radius: 8px;
+          background: #000;
+        }
+        .tl-modal-meta {
+          color: #e8eff9;
+          text-align: center;
+          font-size: 0.9rem;
+          line-height: 1.5;
+        }
+        .tl-modal-meta strong {
+          color: #fff;
+          display: block;
+          font-size: 1rem;
+        }
+        .tl-modal-count {
+          display: block;
+          margin-top: 0.35rem;
+          color: #9db4dd;
+          font-size: 0.8rem;
+          letter-spacing: 0.04em;
+        }
+        .tl-modal button {
+          border: 0;
+          cursor: pointer;
+          color: #fff;
+          background: rgba(28, 63, 156, 0.9);
+          border-radius: 999px;
+        }
+        .tl-modal button:focus-visible {
+          outline: 3px solid #fff;
+          outline-offset: 3px;
+        }
+        .tl-modal-close {
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 44px;
+          height: 44px;
+          font-size: 1.4rem;
+          line-height: 1;
+        }
+        .tl-modal-nav {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 48px;
+          height: 48px;
+          font-size: 1.6rem;
+          line-height: 1;
+        }
+        .tl-modal-prev {
+          left: -0.5rem;
+        }
+        .tl-modal-next {
+          right: -0.5rem;
+        }
+        .tl-modal-thumbs {
+          display: flex;
+          gap: 0.5rem;
+          justify-content: center;
+          flex-wrap: wrap;
+        }
+        .tl-modal-thumbs button {
+          width: 56px;
+          height: 56px;
+          padding: 0;
+          border-radius: 6px;
+          overflow: hidden;
+          background: #0d1b3a;
+          opacity: 0.55;
+        }
+        .tl-modal-thumbs button[aria-current='true'] {
+          opacity: 1;
+          box-shadow: 0 0 0 3px #7fa8f0;
+        }
+        .tl-modal-thumbs img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .tl-modal-thumb-video {
+          color: #cfe0f7;
+          font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+          .tl {
+            max-width: 480px;
+            padding: 1.75rem 0;
+          }
+          .tl::before {
+            left: 14px;
+            width: 28px;
+            border-radius: 14px;
+            transform: none;
+          }
+          .tl-row,
+          .tl-row + .tl-row {
+            grid-template-columns: 1fr;
+            margin-top: 0;
+            margin-bottom: 2.25rem;
+            padding-left: 46px;
+          }
+          .tl-combo,
+          .tl-row:nth-child(even) .tl-combo {
+            grid-column: 1;
+            justify-self: start;
+            margin: 0;
+            width: 100%;
+          }
+          .tl-media,
+          .tl-row:nth-child(even) .tl-media,
+          .tl-pill,
+          .tl-row:nth-child(even) .tl-pill {
+            align-self: flex-start;
+          }
+          .tl-media {
+            width: 132px;
+            height: 132px;
+          }
+          .tl-modal {
+            padding: 1rem;
+          }
+          .tl-modal-nav {
+            width: 40px;
+            height: 40px;
+          }
+          .tl-modal-prev {
+            left: 0;
+          }
+          .tl-modal-next {
+            right: 0;
+          }
+        }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h2 class="titlebar">Timeline at a <span>Glance</span></h2>
+  <h3 class="tl-subhead">Major Milestones and Project Events</h3>
+  <p class="note">
+    <strong>Preview only.</strong> Sample media stands in for the real photos and videos.
+    Card order is now <code>photo → date → caption</code>. Events with no media keep the
+    placeholder; events with media open a viewer on click — arrow keys and
+    <code>Esc</code> work. The video entry has no file behind it, so it shows its poster
+    frame and will not play here.
+  </p>
+  <div class="tl" id="tl"></div>
+</div>
+<div id="viewer"></div>
+<script>
+const EVENTS = [
+  {
+    "date": "13 January 2025",
+    "title": "Contract Signing.",
+    "description": "The ceremonial contract signing for the Pasig City Hall complex marked the official start of one of the city’s most significant infrastructure projects.",
+    "media": [
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(214%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3ESigning%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Signing ceremony"
+      }
+    ]
+  },
+  {
+    "date": "February 2025",
+    "title": "Demolition of the Old Pasig City Hall.",
+    "description": "The demolition of the old Pasig City Hall marked the first major step in preparing the site for the construction of a new government complex designed to serve future generations of Pasigueños.",
+    "media": [
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(24%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3EDemolition%201%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Excavator at the old hall"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(32%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3EDemolition%202%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Site clearing"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(16%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3EDemolition%203%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Rubble removal"
+      }
+    ]
+  },
+  {
+    "date": "15 October 2025",
+    "title": "Groundbreaking and Capsule-Laying.",
+    "description": "The groundbreaking and capsule-laying ceremony marked the official start of construction for the new Pasig City Hall Complex, reflecting Pasig City’s commitment to a smarter, greener, and people-centered future.",
+    "media": [
+      {
+        "src": "groundbreaking.mp4",
+        "poster": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(268%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3EVideo%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Groundbreaking ceremony"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(276%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3ECapsule%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Time capsule"
+      }
+    ]
+  },
+  {
+    "date": "November 2025",
+    "title": "Foundation Works Begin.",
+    "description": "Foundation works commenced as the project moved from planning to construction. Structural works began, laying the groundwork for the future City Hall complex.",
+    "media": []
+  },
+  {
+    "date": "December 2025",
+    "title": "The Structure Begins to Take Shape.",
+    "description": "As construction progressed, the building’s structural framework began to emerge, signaling steady progress on site and bringing the project’s vision closer to reality.",
+    "media": [
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(150%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3EFrame%201%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Steel frame"
+      },
+      {
+        "src": "data:image/svg+xml,%3Csvg%20xmlns%3D'http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg'%20width%3D'960'%20height%3D'720'%3E%3Crect%20width%3D'960'%20height%3D'720'%20fill%3D'hsl(160%2045%25%2032%25)'%2F%3E%3Ctext%20x%3D'480'%20y%3D'390'%20font-family%3D'sans-serif'%20font-size%3D'72'%20fill%3D'white'%20text-anchor%3D'middle'%3EFrame%202%3C%2Ftext%3E%3C%2Fsvg%3E",
+        "alt": "Upper levels"
+      }
+    ]
+  }
+];
+
+const VIDEO_PATTERN = /\.(mp4|webm|ogv|mov)(\?.*)?$/i;
+const kind = (item) => item.type ?? (VIDEO_PATTERN.test(item.src) ? 'video' : 'image');
+const mediaOf = (event) => (Array.isArray(event.media) ? event.media : []);
+const el = (tag, className, text) => {
+  const node = document.createElement(tag);
+  if (className) node.className = className;
+  if (text !== undefined) node.textContent = text;
+  return node;
+};
+
+let viewer = null;
+let lastTrigger = null;
+
+function thumbnail(item, alt) {
+  if (kind(item) === 'video' && !item.poster) {
+    const video = document.createElement('video');
+    Object.assign(video, { src: item.src, muted: true, playsInline: true, preload: 'metadata' });
+    video.setAttribute('aria-label', alt);
+    return video;
+  }
+  const img = document.createElement('img');
+  img.src = kind(item) === 'video' ? item.poster : item.src;
+  img.alt = alt;
+  return img;
+}
+
+function renderRow(event, index) {
+  const row = el('div', 'tl-row');
+  const combo = el('div', 'tl-combo');
+  const media = mediaOf(event);
+  const label = event.title.replace(/\.$/, '');
+
+  // Card order: media, then date, then caption.
+  if (media.length === 0) {
+    const box = el('div', 'tl-media');
+    const ph = el('div', 'tl-media-ph');
+    ph.setAttribute('aria-hidden', 'true');
+    ph.append(el('span', 'tl-media-icon', '\u{1F4F7}'), el('span', 'tl-media-note', 'Photo'));
+    box.append(ph);
+    combo.append(box);
+  } else {
+    const button = el('button', 'tl-media');
+    button.type = 'button';
+    button.setAttribute(
+      'aria-label',
+      media.length === 1
+        ? 'View the photo for ' + label
+        : 'View all ' + media.length + ' photos and videos for ' + label,
+    );
+    button.append(thumbnail(media[0], media[0].alt ?? label));
+    if (kind(media[0]) === 'video') {
+      const play = el('span', 'tl-media-play');
+      play.setAttribute('aria-hidden', 'true');
+      play.append(el('span', null, '▶'));
+      button.append(play);
+    }
+    if (media.length > 1) {
+      const badge = el('span', 'tl-media-badge', '+' + (media.length - 1));
+      badge.setAttribute('aria-hidden', 'true');
+      button.append(badge);
+    }
+    button.addEventListener('click', () => open(index, button));
+    combo.append(button);
+  }
+
+  combo.append(el('span', 'tl-pill', event.date));
+
+  const caption = el('div', 'tl-caption');
+  const p = document.createElement('p');
+  p.append(el('strong', null, event.title), ' ' + event.description);
+  caption.append(p);
+  combo.append(caption);
+
+  row.append(combo);
+  return row;
+}
+
+function open(eventIndex, trigger) {
+  lastTrigger = trigger;
+  viewer = { eventIndex, itemIndex: 0 };
+  renderViewer();
+}
+
+function close() {
+  viewer = null;
+  document.body.style.overflow = '';
+  document.getElementById('viewer').replaceChildren();
+  lastTrigger?.focus();
+}
+
+function step(delta) {
+  const total = mediaOf(EVENTS[viewer.eventIndex]).length;
+  viewer.itemIndex = (viewer.itemIndex + delta + total) % total;
+  renderViewer();
+}
+
+function show(i) {
+  viewer.itemIndex = i;
+  renderViewer();
+}
+
+function renderViewer() {
+  const mount = document.getElementById('viewer');
+  const event = EVENTS[viewer.eventIndex];
+  const media = mediaOf(event);
+  const item = media[viewer.itemIndex];
+  const label = event.title.replace(/\.$/, '');
+  const many = media.length > 1;
+
+  const modal = el('div', 'tl-modal');
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  modal.setAttribute('aria-label', label + ' — ' + event.date);
+
+  const panel = el('div', 'tl-modal-panel');
+
+  const closeBtn = el('button', 'tl-modal-close', '✕');
+  closeBtn.type = 'button';
+  closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.addEventListener('click', close);
+  panel.append(closeBtn);
+
+  const stage = el('div', 'tl-modal-stage');
+  if (kind(item) === 'video') {
+    const video = document.createElement('video');
+    Object.assign(video, { src: item.src, controls: true, autoplay: true, playsInline: true });
+    if (item.poster) video.poster = item.poster;
+    stage.append(video);
+  } else {
+    const img = document.createElement('img');
+    img.src = item.src;
+    img.alt = item.alt ?? label;
+    stage.append(img);
+  }
+  if (many) {
+    for (const [cls, glyph, delta, name] of [
+      ['tl-modal-prev', '‹', -1, 'Previous'],
+      ['tl-modal-next', '›', 1, 'Next'],
+    ]) {
+      const nav = el('button', 'tl-modal-nav ' + cls, glyph);
+      nav.type = 'button';
+      nav.setAttribute('aria-label', name);
+      nav.addEventListener('click', () => step(delta));
+      stage.append(nav);
+    }
+  }
+  panel.append(stage);
+
+  const meta = el('p', 'tl-modal-meta');
+  meta.append(el('strong', null, label), event.date);
+  if (many) meta.append(el('span', 'tl-modal-count', viewer.itemIndex + 1 + ' of ' + media.length));
+  panel.append(meta);
+
+  if (many) {
+    const thumbs = el('div', 'tl-modal-thumbs');
+    media.forEach((entry, i) => {
+      const b = el('button');
+      b.type = 'button';
+      b.setAttribute('aria-current', String(i === viewer.itemIndex));
+      b.setAttribute('aria-label', 'Show item ' + (i + 1));
+      if (kind(entry) === 'video' && !entry.poster) {
+        b.append(el('span', 'tl-modal-thumb-video', '▶'));
+      } else {
+        const img = document.createElement('img');
+        img.src = entry.poster ?? entry.src;
+        img.alt = '';
+        b.append(img);
+      }
+      b.addEventListener('click', () => show(i));
+      thumbs.append(b);
+    });
+    panel.append(thumbs);
+  }
+
+  modal.append(panel);
+  modal.addEventListener('mousedown', (e) => {
+    if (panel.contains(e.target)) return;
+    // Without this the browser's own mousedown handling moves focus to
+    // <body> straight after we restore it, stranding keyboard users.
+    e.preventDefault();
+    close();
+  });
+
+  mount.replaceChildren(modal);
+  document.body.style.overflow = 'hidden';
+  closeBtn.focus();
+}
+
+document.addEventListener('keydown', (e) => {
+  if (viewer === null) return;
+  if (e.key === 'Escape') { e.preventDefault(); close(); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); step(-1); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); step(1); }
+});
+
+document.getElementById('tl').append(...EVENTS.map(renderRow));
+
+</script>
+</body>
+</html>
