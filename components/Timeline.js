@@ -80,6 +80,9 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
           font-weight: 700;
         }
         .tl {
+          /* Distance from the edge of a card to the centre of the rail. Drives
+             the card offset, the connector line and the dot together. */
+          --rail-gap: 48px;
           position: relative;
           max-width: 940px;
           margin: 1rem auto 0;
@@ -108,7 +111,7 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
         .tl-combo {
           grid-column: 1;
           justify-self: end;
-          margin-right: 24px;
+          margin-right: var(--rail-gap);
           width: min(380px, 100%);
           display: flex;
           flex-direction: column;
@@ -119,10 +122,10 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
           grid-column: 2;
           justify-self: start;
           margin-right: 0;
-          margin-left: 24px;
+          margin-left: var(--rail-gap);
         }
         .tl-media {
-          align-self: flex-end;
+          align-self: center;
           width: 200px;
           height: 200px;
           position: relative;
@@ -132,6 +135,7 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
           display: block;
         }
         .tl-pill {
+          position: relative;
           align-self: flex-end;
           white-space: nowrap;
           background: #2456c8;
@@ -141,9 +145,41 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
           font-size: 0.82rem;
           font-weight: 600;
         }
-        .tl-row:nth-child(even) .tl-media,
         .tl-row:nth-child(even) .tl-pill {
           align-self: flex-start;
+        }
+
+        /* Connector: a line from the date out to a dot sitting on the rail. */
+        .tl-pill::before,
+        .tl-pill::after {
+          content: '';
+          position: absolute;
+          top: 50%;
+          background: #1c3f9c;
+        }
+        .tl-pill::after {
+          width: var(--rail-gap);
+          height: 3px;
+          transform: translateY(-50%);
+        }
+        .tl-pill::before {
+          width: 13px;
+          height: 13px;
+          border-radius: 50%;
+        }
+        .tl-row:nth-child(odd) .tl-pill::after {
+          left: 100%;
+        }
+        .tl-row:nth-child(odd) .tl-pill::before {
+          left: calc(100% + var(--rail-gap));
+          transform: translate(-50%, -50%);
+        }
+        .tl-row:nth-child(even) .tl-pill::after {
+          right: 100%;
+        }
+        .tl-row:nth-child(even) .tl-pill::before {
+          right: calc(100% + var(--rail-gap));
+          transform: translate(50%, -50%);
         }
         .tl-media img,
         .tl-media video,
@@ -379,15 +415,30 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
             margin: 0;
             width: 100%;
           }
-          .tl-media,
-          .tl-row:nth-child(even) .tl-media,
           .tl-pill,
           .tl-row:nth-child(even) .tl-pill {
             align-self: flex-start;
           }
-          .tl-media {
+          .tl-media,
+          .tl-row:nth-child(even) .tl-media {
+            align-self: center;
             width: 132px;
             height: 132px;
+          }
+          /* Rail centre is 28px from the left edge, cards start at 46px. */
+          .tl {
+            --rail-gap: 18px;
+          }
+          .tl-pill::after,
+          .tl-row:nth-child(odd) .tl-pill::after {
+            left: auto;
+            right: 100%;
+          }
+          .tl-pill::before,
+          .tl-row:nth-child(odd) .tl-pill::before {
+            left: auto;
+            right: calc(100% + var(--rail-gap));
+            transform: translate(50%, -50%);
           }
           .tl-modal {
             padding: 1rem;

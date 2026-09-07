@@ -144,6 +144,38 @@ test('the built page no longer pins the date to the centre rail', () => {
   );
 });
 
+test('the photo is centred in the card', () => {
+  const css = built.replace(/\s+/g, '');
+  assert.ok(
+    /\.tl-media\{[^}]*align-self:center/.test(css),
+    'the photo is not centred in its card',
+  );
+});
+
+test('the date connects to the rail with a line and a dot', () => {
+  const css = built.replace(/\s+/g, '');
+  // One variable sets how far a card sits from the rail, how long the line
+  // is, and where the dot lands. If they were separate numbers they would
+  // drift and the dot would sit off the rail.
+  assert.ok(/--rail-gap:\d/.test(css), '--rail-gap is missing');
+  assert.ok(
+    /\.tl-combo\{[^}]*margin-right:var\(--rail-gap\)/.test(css),
+    'the card offset is not driven by --rail-gap',
+  );
+  assert.ok(
+    /\.tl-pill::after\{[^}]*width:var\(--rail-gap\)/.test(css),
+    'the connector line length is not driven by --rail-gap',
+  );
+  assert.ok(
+    /\.tl-pill::before\{[^}]*border-radius:50%/.test(css),
+    'the connector dot is missing',
+  );
+  assert.ok(
+    /calc\(100%\+var\(--rail-gap\)\)/.test(css),
+    'the dot is not positioned a full --rail-gap from the date',
+  );
+});
+
 test('the built page ships the viewer stylesheet', () => {
   assert.ok(built.includes('.tl-modal'), 'the media viewer styles were not built');
 });
