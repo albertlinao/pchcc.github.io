@@ -108,8 +108,8 @@ clicking opens a viewer — arrow keys step, `Esc` closes, thumbnails jump.
 ### Adding new photos
 
 ```bash
-npm install                          # first time, or after pulling
-npm run photos -- ~/Downloads/*.png
+npm install                                  # first time, or after pulling
+npm run photos -- ~/Desktop/pchcc-images     # a folder, files, or a glob
 ```
 
 That is the whole thing. For each photo it writes two web-sized JPEGs into

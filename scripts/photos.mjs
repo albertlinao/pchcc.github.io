@@ -1,7 +1,10 @@
 /**
  * Add photos to the About-page timeline.
  *
- *   npm run photos -- ~/Downloads/*.png
+ *   npm run photos -- ~/Desktop/pchcc-images
+ *   npm run photos -- ~/Downloads/2025-11-foundation.png
+ *
+ * Takes a folder, single files, or a glob.
  *
  * For each photo it:
  *   1. writes two web-sized JPEGs into public/images/timeline/ — a full one
@@ -19,7 +22,7 @@
  * JPEGs are served. Keep them wherever you like.
  */
 
-import { existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { basename, join, parse } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
@@ -70,16 +73,42 @@ async function loadSharp() {
 // Inputs
 // ---------------------------------------------------------------------------
 
+const USAGE = [
+  '  npm run photos -- ~/Desktop/pchcc-images        a whole folder',
+  '  npm run photos -- ~/Desktop/photo.png           one or more files',
+];
+
 const args = process.argv.slice(2);
-if (args.length === 0) {
-  die('Nothing to do.', '', '  npm run photos -- path/to/photos/*.png', '');
+if (args.length === 0) die('Nothing to do.', '', ...USAGE, '');
+
+const missing = args.filter((a) => !existsSync(a));
+if (missing.length > 0) {
+  die(
+    'These do not exist:',
+    ...missing.map((f) => `  ${f}`),
+    '',
+    // A glob that matches nothing is an error in zsh, so it never gets here;
+    // a stray character before the path is the usual reason one misses.
+    'Check the path. Remember the space after --:',
+    ...USAGE,
+  );
 }
 
-const inputs = args.filter((a) => IMAGE.test(a));
-if (inputs.length === 0) die('None of those look like images (png, jpg, tiff, webp).');
+// A folder is expanded to the images inside it, so no glob is needed — and no
+// shell gets a chance to mangle one.
+const inputs = args.flatMap((arg) =>
+  statSync(arg).isDirectory()
+    ? readdirSync(arg)
+        .filter((f) => IMAGE.test(f))
+        .map((f) => join(arg, f))
+    : [arg],
+);
 
-const missing = inputs.filter((f) => !existsSync(f));
-if (missing.length > 0) die('These do not exist:', ...missing.map((f) => `  ${f}`));
+const notImages = inputs.filter((f) => !IMAGE.test(f));
+if (notImages.length > 0) {
+  die('These are not images (png, jpg, tiff, webp):', ...notImages.map((f) => `  ${f}`));
+}
+if (inputs.length === 0) die(`No images found in ${args.join(', ')}.`);
 
 // ---------------------------------------------------------------------------
 // Which event does each photo belong to?
