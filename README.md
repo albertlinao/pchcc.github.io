@@ -93,12 +93,34 @@ clicking opens a viewer — arrow keys step, `Esc` closes, thumbnails jump.
 ```
 
 - Media files go in `public/`, and are referenced by their path from there.
+  `npm test` fails if a referenced file is not there.
 - `.mp4`, `.webm`, `.ogv` and `.mov` are treated as video; anything else as
   an image. Set `type: 'video'` for a URL with no extension.
 - Give every video a `poster`, or its thumbnail is whatever its first frame
   happens to be — often black.
 - `alt` is required on images and checked by `npm test`. Describe what is in
   the frame, not "photo of".
+- `objectPosition` (optional, any CSS `object-position` value) shifts what
+  the round thumbnail shows. The card is a circle and most frames are much
+  wider, so `cover` shows only the middle; use this when the middle is the
+  wrong part of the picture. The viewer always shows the whole frame.
+
+### Photos still to be added
+
+The client supplied five frames. They are used as delivered — several carry
+burned-in date badges and captions that the round thumbnail crops off, and
+cleaning them up is not ours to do. The full frame is visible in the viewer
+either way, and the date pill already carries the date.
+
+| File to add under `public/images/timeline/` | Event | Notes |
+| --- | --- | --- |
+| `2025-10-groundbreaking.jpg` | 15 October 2025 | The circular two-panel shovel photo. Already cut round, so it crops best — list it first to make it the thumbnail. |
+| `2025-10-planning.jpg` | 15 October 2025 | Crowd around the scale model, "From planning". |
+| `2025-10-aerial.jpg` | 15 October 2025 | Aerial of the site, "To ground breaking". |
+| `2025-10-capsule.jpg` | 15 October 2025 | Group with shovels, "To capsule laying". |
+| `2025-11-structural.jpg` | November 2025 | Rebar column and workers. Filed by its stamped date, though its caption reads "structural works continue". A split frame, so it wants an `objectPosition` — centre lands on the seam. |
+
+That gives October a four-item gallery and November a single image.
 
 The stylesheet is `<style jsx global>` rather than scoped, because
 styled-jsx only scopes the JSX of the component that declares the block —

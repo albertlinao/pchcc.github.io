@@ -144,6 +144,19 @@ test('the built page no longer pins the date to the centre rail', () => {
   );
 });
 
+test('a photo can bias its thumbnail crop', () => {
+  // Wide frames get centre-cropped into the round card. objectPosition moves
+  // that window for the ones whose middle is the wrong part of the picture.
+  const thumb = functionBody(component, 'Thumbnail');
+  assert.ok(thumb.includes('item.objectPosition'), 'objectPosition is not read');
+  assert.ok(thumb.includes('style={style}'), 'objectPosition is not applied to the image');
+  // The viewer must keep showing the whole frame.
+  assert.ok(
+    !functionBody(component, 'MediaViewer').includes('objectPosition'),
+    'the viewer crops the image; it should show the full frame',
+  );
+});
+
 test('the photo is centred in the card', () => {
   const css = built.replace(/\s+/g, '');
   assert.ok(

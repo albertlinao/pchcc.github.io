@@ -20,6 +20,11 @@
  *
  * `alt` describes the picture for screen readers and for anyone whose
  * images fail to load. Say what is in the frame, not "photo of".
+ *
+ * `objectPosition` (any CSS object-position value, e.g. 'left center' or
+ * '50% 30%') shifts what the round thumbnail shows. Wide frames get
+ * centre-cropped to a square, so reach for this when the middle is the wrong
+ * part of the picture. The viewer is unaffected — it shows the whole frame.
  */
 
 export const TIMELINE_EVENTS = [

@@ -512,16 +512,25 @@ function TimelineRow({ event, onOpen, registerTrigger }) {
   );
 }
 
-/** A still frame for the card: the poster for a video, the image itself otherwise. */
+/**
+ * A still frame for the card: the poster for a video, the image itself
+ * otherwise.
+ *
+ * The card is a circle and the frame is usually much wider, so `cover` shows
+ * only the middle. `objectPosition` moves that window when the middle is the
+ * wrong part of the picture — a split frame whose centre lands on the seam,
+ * say. It only affects the thumbnail; the viewer always shows the whole frame.
+ */
 function Thumbnail({ item, alt }) {
+  const style = item.objectPosition ? { objectPosition: item.objectPosition } : undefined;
   if (mediaKind(item) === 'video') {
     return item.poster ? (
-      <img src={item.poster} alt={alt} />
+      <img src={item.poster} alt={alt} style={style} />
     ) : (
-      <video src={item.src} muted playsInline preload="metadata" aria-label={alt} />
+      <video src={item.src} muted playsInline preload="metadata" aria-label={alt} style={style} />
     );
   }
-  return <img src={item.src} alt={alt} />;
+  return <img src={item.src} alt={alt} style={style} />;
 }
 
 function MediaViewer({ event, index, onClose, onStep, onShow }) {
