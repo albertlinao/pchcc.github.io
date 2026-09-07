@@ -1,0 +1,25 @@
+{
+  "name": "pchcc-site",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "photos": "node scripts/photos.mjs",
+    "publish": "next build && node scripts/publish-docs.mjs && node --test tests/*.test.mjs",
+    "publish:docs": "next build && node scripts/publish-docs.mjs",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "next": "^14.2.5",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "sharp": "^0.35.4"
+  },
+  "engines": {
+    "node": ">=20.11"
+  }
+}
