@@ -116,6 +116,22 @@ test('a photo filename is read the way people write it', () => {
   }
 });
 
+test('no thumbnail is recorded as a photo in its own right', () => {
+  // Feeding the script its own output once recorded five thumbnails as
+  // photos: each would appear in the gallery and grow a thumbnail of itself.
+  const thumbs = [];
+  for (const [date, items] of Object.entries(TIMELINE_MEDIA)) {
+    for (const item of items) {
+      if (item.file.endsWith('-thumb')) thumbs.push(`${date}: ${item.file}`);
+    }
+  }
+  assert.deepEqual(
+    thumbs,
+    [],
+    `these are generated thumbnails, not photos:\n  ${thumbs.join('\n  ')}`,
+  );
+});
+
 test('every media file referenced actually exists', () => {
   // A typo or a photo that was never committed would otherwise reach the
   // client as a broken image on staging, which is worse than a placeholder.

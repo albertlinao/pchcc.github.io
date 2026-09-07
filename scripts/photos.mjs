@@ -23,7 +23,7 @@
  */
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
-import { basename, join, parse } from 'node:path';
+import { basename, join, parse, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 import { TIMELINE_EVENTS, eventMonth, filenameMonth } from '../components/timelineEvents.mjs';
@@ -36,6 +36,8 @@ const DATA = join(REPO, 'content', 'timeline-media.mjs');
 const FULL_WIDTH = 1920;
 /** The card is a 200px circle; 600px covers 2x comfortably. */
 const THUMB_WIDTH = 600;
+/** Appended to the square copy this script writes for each photo. */
+const THUMB_SUFFIX = '-thumb';
 const QUALITY = 82;
 
 const IMAGE = /\.(png|jpe?g|tiff?|webp)$/i;
@@ -136,7 +138,37 @@ const notImages = inputs.filter((f) => !IMAGE.test(f));
 if (notImages.length > 0) {
   die('These are not images (png, jpg, tiff, webp):', ...notImages.map((f) => `  ${f}`));
 }
-if (inputs.length === 0) die(`No images found in ${args.join(', ')}.`);
+
+/**
+ * Is this a file this script produced?
+ *
+ * Feeding output back in re-encodes an already-compressed picture, and a
+ * thumbnail read as a photo would be recorded as one — appearing in the
+ * gallery in its own right and growing a thumbnail of a thumbnail. Both
+ * happened when a folder turned out to hold copies of the output.
+ */
+function isOwnOutput(path) {
+  const { dir, name } = parse(resolve(path));
+  return dir === resolve(TARGET) || name.endsWith(THUMB_SUFFIX);
+}
+
+const ownOutput = inputs.filter(isOwnOutput);
+const sources = inputs.filter((f) => !isOwnOutput(f));
+
+if (ownOutput.length > 0) {
+  console.log(
+    `Skipping ${ownOutput.length} file${ownOutput.length === 1 ? '' : 's'} this script produced:`,
+  );
+  for (const f of ownOutput) console.log(`  ${basename(f)}`);
+  console.log('Photos are converted from the originals, not from the output.\n');
+}
+
+if (sources.length === 0) {
+  die(
+    `No photos to convert in ${args.join(', ')}.`,
+    ownOutput.length > 0 ? '\nEverything there was output from a previous run.' : '',
+  );
+}
 
 // ---------------------------------------------------------------------------
 // Which event does each photo belong to?
@@ -157,7 +189,7 @@ for (const event of TIMELINE_EVENTS) {
 const planned = [];
 const unplaceable = [];
 
-for (const path of inputs) {
+for (const path of sources) {
   const { name } = parse(path);
   const month = filenameMonth(name);
   if (month === null) {
@@ -240,7 +272,7 @@ for (const photo of planned) {
       height: Math.round(crop.height * meta.height),
     });
   }
-  const thumb = join(TARGET, `${photo.name}-thumb.jpg`);
+  const thumb = join(TARGET, `${photo.name}${THUMB_SUFFIX}.jpg`);
   await pipeline
     .resize({ width: THUMB_WIDTH, height: THUMB_WIDTH, fit: 'cover', position: 'centre' })
     .jpeg({ quality: QUALITY, mozjpeg: true })
