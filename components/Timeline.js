@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import { TIMELINE_EVENTS, mediaKind, mediaOf } from './events';
+import { TIMELINE_EVENTS, mediaKind, mediaOf } from './timelineEvents.mjs';
 
 /**
  * Timeline for the About page.
@@ -70,7 +70,7 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
         />
       )}
 
-      <style jsx>{`
+      <style jsx global>{`
         /* timeline.css:start */
         .tl-subhead {
           text-align: center;

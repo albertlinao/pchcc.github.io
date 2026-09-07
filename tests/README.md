@@ -7,9 +7,9 @@ npm test
 No dependencies — Node 18+ and its built-in test runner.
 
 Most of these read the exported HTML in `docs/` the way GitHub Pages serves
-it (`/about` → `docs/about.html`), because the shipped files are all there
-is to test. `timeline.test.mjs` is the exception: it covers the component
-staged in `source/timeline/`, which is where a React change has to land.
+it (`/about` → `docs/about.html`). `timeline.test.mjs` also reads the
+component in `components/`, so it can check the source and the HTML that
+source produced — which is what catches a change that was never rebuilt.
 
 ## The two phases
 
@@ -46,12 +46,14 @@ the moment `/v2` is gone. After approval: no `/v2` page is served, nothing
 links to `/v2`, no `/v2` files remain, every expected route is reachable by
 clicking from the home page, and the nav matches the approved design.
 
-**`timeline.test.mjs`** — the About-page timeline contract, against
-`source/timeline/`. Card order is photo, then date, then caption; the date
-pill is in the flow rather than pinned to the centre rail; every event
-carries a media list; an event with no media keeps a non-clickable
-placeholder; the viewer handles `Esc` and the arrow keys; and the prototype
-is not stale. See `source/README.md`.
+**`timeline.test.mjs`** — the About-page timeline contract, in
+`components/Timeline.js` and in the `docs/v2/about.html` it built. Card
+order is photo, then date, then caption; the date pill is in the flow
+rather than pinned to the centre rail; every event carries a media list and
+every image an `alt`; an event with no media keeps a non-clickable
+placeholder; the viewer handles `Esc` and the arrow keys; the stylesheet is
+global so it reaches the child components; and the built page matches all
+of it. See the timeline section of the root README.
 
 ## Promotion is a rebuild, not a file move
 
@@ -66,8 +68,19 @@ React rewrites its own links back to `/v2` — which no longer exists. Every nav
 click 404s, and view-source shows nothing wrong.
 
 `promotion.test.mjs` catches this (`no JavaScript chunk still routes to /v2`,
-`no script tag loads a /v2 page bundle`), but the fix is upstream: re-export
-from the Next.js project with the v2 pages at the root, and commit that build.
+`no script tag loads a /v2 page bundle`). The fix is to do the cutover in
+the source instead:
+
+```
+git mv pages/v2/about.js pages/about.js        # and the rest of pages/v2/
+git rm components/Layout.js                    # LayoutV2 becomes the Layout
+npm run publish:docs
+npm test
+```
+
+Point the remaining pages at the promoted layout, drop the `/v2` prefixes
+from its nav and footer, and rebuild. The nine skipped tests activate the
+moment `docs/v2` stops existing and will tell you what is left.
 
 ## Changing the approved design
 

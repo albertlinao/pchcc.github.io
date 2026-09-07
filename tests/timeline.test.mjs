@@ -1,57 +1,53 @@
 /**
  * The About-page timeline contract.
  *
- * These guard the shape the client asked for — card order photo, date,
- * caption; media optional; placeholder retained when an event has none —
- * against the component source in source/timeline/, which is where the
- * change has to land. They do not touch docs/, which is build output.
+ * Checked twice over: against the component in components/, and against the
+ * HTML it actually produced in docs/. The second half is what catches a
+ * source change that was never rebuilt.
  */
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-import { TIMELINE_EVENTS, mediaKind, mediaOf } from '../source/timeline/events.js';
-import { COMPONENT, PROTOTYPE, SAMPLE, extractCss, render } from '../source/timeline/build-prototype.mjs';
+import { TIMELINE_EVENTS, mediaKind, mediaOf } from '../components/timelineEvents.mjs';
 
-const component = readFileSync(COMPONENT, 'utf8');
+const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '..');
+const component = readFileSync(join(REPO, 'components/Timeline.js'), 'utf8');
+const built = readFileSync(join(REPO, 'docs/v2/about.html'), 'utf8');
 
 /** The body of a named function in the component source. */
 function functionBody(source, name) {
   const start = source.indexOf(`function ${name}(`);
-  assert.notEqual(start, -1, `${name} not found in Timeline.jsx`);
+  assert.notEqual(start, -1, `${name} not found in Timeline.js`);
   const next = source.indexOf('\nfunction ', start + 1);
   return source.slice(start, next === -1 ? undefined : next);
 }
 
-/** Order of the given class names as they appear in a chunk of source. */
+/** Order of the given class names by first appearance in a chunk of text. */
 function orderOf(source, names) {
   return names
-    .map((name) => ({ name, at: source.indexOf(`"${name}"`) }))
+    .map((name) => ({ name, at: source.indexOf(name) }))
     .filter((entry) => entry.at !== -1)
     .sort((a, b) => a.at - b.at)
     .map((entry) => entry.name);
 }
 
-test('a card reads photo, then date, then caption', () => {
-  // The requested change: the date pill moved out of the rail and into the
-  // card, below the picture.
-  const row = functionBody(component, 'TimelineRow');
-  assert.deepEqual(orderOf(row, ['tl-caption', 'tl-pill', 'tl-media']), [
-    'tl-media',
-    'tl-pill',
-    'tl-caption',
-  ]);
-});
+// ---------------------------------------------------------------------------
+// The component
+// ---------------------------------------------------------------------------
 
-test('the date pill sits in the flow, not pinned to the centre rail', () => {
-  const css = extractCss(component);
-  const rule = css.slice(css.indexOf('.tl-pill {'), css.indexOf('}', css.indexOf('.tl-pill {')));
-  assert.ok(!/position:\s*absolute/.test(rule), '.tl-pill is still absolutely positioned');
-  assert.ok(
-    !/\.tl-row:nth-child\((odd|even)\) \.tl-pill \{[^}]*transform/.test(css),
-    'the old odd/even pill offsets are still in the stylesheet',
-  );
+test('a card reads photo, then date, then caption', () => {
+  // The requested change: the date pill moved off the centre rail and into
+  // the card, below the picture.
+  const row = functionBody(component, 'TimelineRow');
+  assert.deepEqual(orderOf(row, ['"tl-caption"', '"tl-pill"', '"tl-media"']), [
+    '"tl-media"',
+    '"tl-pill"',
+    '"tl-caption"',
+  ]);
 });
 
 test('every event carries a media list', () => {
@@ -97,23 +93,53 @@ test('the viewer can be closed and stepped through by keyboard', () => {
   assert.ok(viewer.includes('aria-modal'), 'the viewer is not marked as a modal dialog');
 });
 
-test('the prototype is up to date with the component', () => {
-  // The prototype lifts its CSS from Timeline.jsx. If they disagree, someone
-  // changed the component without rerunning the build.
-  assert.equal(
-    readFileSync(PROTOTYPE, 'utf8'),
-    render(),
-    'prototype.html is stale — run: node source/timeline/build-prototype.mjs',
+test('the timeline styles are global, so they reach the child components', () => {
+  // styled-jsx scopes a <style jsx> block to the JSX of the component that
+  // declares it. TimelineRow and MediaViewer are separate components, so a
+  // scoped block would style the outer .tl wrapper and nothing inside it.
+  assert.ok(
+    component.includes('<style jsx global>'),
+    'the timeline stylesheet is scoped; its rows and viewer would render unstyled',
   );
 });
 
-test('the prototype exercises the empty, single, multiple and video cases', () => {
-  const counts = SAMPLE.map((e) => mediaOf(e).length);
-  assert.ok(counts.includes(0), 'no event without media');
-  assert.ok(counts.includes(1), 'no event with exactly one item');
-  assert.ok(counts.some((n) => n > 1), 'no event with several items');
+// ---------------------------------------------------------------------------
+// The build output — proof the source change actually shipped
+// ---------------------------------------------------------------------------
+
+test('the built page renders the card as photo, date, caption', () => {
+  assert.deepEqual(orderOf(built, ['tl-caption', 'tl-pill', 'tl-media']), [
+    'tl-media',
+    'tl-pill',
+    'tl-caption',
+  ]);
+});
+
+test('the built page no longer pins the date to the centre rail', () => {
+  const at = built.indexOf('.tl-pill');
+  assert.notEqual(at, -1, '.tl-pill is missing from the built stylesheet');
+  const rule = built.slice(at, built.indexOf('}', at));
+  assert.ok(!/position:\s*absolute/.test(rule), '.tl-pill is still absolutely positioned');
   assert.ok(
-    SAMPLE.some((e) => mediaOf(e).some((item) => mediaKind(item) === 'video')),
-    'no video among the samples',
+    !/\.tl-row:nth-child\((odd|even)\) \.tl-pill\{[^}]*transform/.test(built.replace(/\s+/g, '')),
+    'the old odd/even pill offsets are still shipping',
   );
+});
+
+test('the built page ships the viewer stylesheet', () => {
+  assert.ok(built.includes('.tl-modal'), 'the media viewer styles were not built');
+});
+
+test('the built page has one card per event, each with a date and a caption', () => {
+  const rows = built.match(/class="tl-row"/g) ?? [];
+  assert.equal(rows.length, TIMELINE_EVENTS.length, 'card count does not match the event list');
+  for (const event of TIMELINE_EVENTS) {
+    assert.ok(built.includes(`<span class="tl-pill">${event.date}</span>`), `${event.date} is missing`);
+  }
+});
+
+test('events without media render the placeholder in the built page', () => {
+  const empty = TIMELINE_EVENTS.filter((e) => mediaOf(e).length === 0).length;
+  const placeholders = (built.match(/class="tl-media-ph"/g) ?? []).length;
+  assert.equal(placeholders, empty, 'placeholder count does not match events without media');
 });
