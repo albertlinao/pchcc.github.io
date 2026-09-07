@@ -51,5 +51,74 @@ export default {
       // is the daytime half, and stop short of the caption band.
       crop: { left: 0.56, top: 0, width: 0.34, height: 0.78 },
     },
+      {
+      file: 'nov-2025-foundation-begins',
+      alt: '',
+    },
+    {
+      file: 'nov-2025-foundation',
+      alt: '',
+    },
+],
+
+  'April 2026': [
+    {
+      file: 'april-2026-1',
+      alt: '',
+    },
   ],
+
+  'December 2025': [
+    {
+      file: 'dec-2025-structural-begins',
+      alt: '',
+    },
+  ],
+
+  'February 2025': [
+    {
+      file: 'feb-2025-demolition-1',
+      alt: '',
+    },
+      {
+      file: 'feb-2025-demolition-2',
+      alt: '',
+    },
+],
+
+  '14 February 2026': [
+    {
+      file: 'feb-2026-1',
+      alt: '',
+    },
+      {
+      file: 'feb-2026',
+      alt: '',
+    },
+],
+
+  '13 January 2025': [
+    {
+      file: 'jan-2025-contract-signing',
+      alt: '',
+    },
+  ],
+
+  '15 June 2026': [
+    {
+      file: 'june-2026-topping-off',
+      alt: '',
+    },
+  ],
+
+  'March 2026': [
+    {
+      file: 'march-2026-1',
+      alt: '',
+    },
+      {
+      file: 'march-2026-structural-continues',
+      alt: '',
+    },
+],
 };
