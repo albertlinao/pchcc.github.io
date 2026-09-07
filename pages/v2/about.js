@@ -3,35 +3,67 @@ import Layout from '../../components/LayoutV2';
 export default function AboutPageV2() {
   const timelineEvents = [
     {
-      date: 'JANUARY 13, 2025',
+      date: '13 January 2025',
+      title: 'Contract Signing.',
       description:
-        'The Construction Contract for the Design and Build Services (Demolition of existing structures within Pasig City Hall Compound and Construction of the New Pasig City Hall) at Caruncho Avenue., Brgy. San Nicolas, Pasig City, under ITB No: PB-04-03-2024-07, was signed by the representatives of the City Government of Pasig and the Pasig City Hall Construction Consortium',
-      isComplete: true,
+        'The ceremonial contract signing for the Pasig City Hall complex marked the official start of one of the city’s most significant infrastructure projects.',
+      image: null,
     },
     {
-      date: 'JANUARY 30, 2025',
-      description: 'The City Government of Pasig released the Notice to Proceed to PCHCC',
-      isComplete: true,
+      date: 'February 2025',
+      title: 'Demolition of the Old Pasig City Hall.',
+      description:
+        'The demolition of the old Pasig City Hall marked the first major step in preparing the site for the construction of a new government complex designed to serve future generations of Pasigueños.',
+      image: null,
     },
     {
-      date: 'APRIL 24, 2025',
-      description: 'The City Government of Pasig turned over the Pasig City Hall Main Building to PCHCC',
-      isComplete: true,
+      date: '15 October 2025',
+      title: 'Groundbreaking and Capsule-Laying.',
+      description:
+        'The groundbreaking and capsule-laying ceremony marked the official start of construction for the new Pasig City Hall Complex, reflecting Pasig City’s commitment to a smarter, greener, and people-centered future.',
+      image: null,
     },
     {
-      date: 'OCTOBER 15, 2025',
-      description: 'Groundbreaking and Capsule-Laying Ceremony',
-      isComplete: true,
+      date: 'November 2025',
+      title: 'Foundation Works Begin.',
+      description:
+        'Foundation works commenced as the project moved from planning to construction. Structural works began, laying the groundwork for the future City Hall complex.',
+      image: null,
     },
     {
-      date: 'FEBRUARY 14, 2026',
-      description: 'Ceremonial First Concrete Pour',
-      isComplete: true,
+      date: 'December 2025',
+      title: 'The Structure Begins to Take Shape.',
+      description:
+        'As construction progressed, the building’s structural framework began to emerge, signaling steady progress on site and bringing the project’s vision closer to reality.',
+      image: null,
     },
     {
-      date: 'JUNE 15, 2026',
-      description: 'Topping Off Ceremony',
-      isComplete: true,
+      date: '14 February 2026',
+      title: 'First Concrete Pour.',
+      description:
+        'The ceremonial first concrete pour marked the start of major construction activities for the new Pasig City Hall Complex, laying the foundation for a modern and future-ready government center for Pasigueños.',
+      image: null,
+    },
+    {
+      date: 'March 2026',
+      title: 'Structural Works Continue.',
+      description:
+        'Structural works continued across multiple levels, maintaining construction momentum, and advancing the development of the new City Hall.',
+      image: null,
+    },
+    {
+      date: 'April 2026',
+      title: 'Structural Works and Slab Concreting.',
+      description:
+        'Construction activities continued with structural works and slab concreting, bringing the project closer to the completion of its primary structural framework.',
+      image: null,
+    },
+    {
+      date: '15 June 2026',
+      title: 'Topping Off.',
+      description:
+        'The project reached a major milestone with the topping-off ceremony, marking the completion of the building’s primary structural framework and the transition to the next phase of construction.',
+      image: null,
     },
   ];
 
@@ -163,17 +195,28 @@ export default function AboutPageV2() {
             </figure>
           </div>
 
-          <div className="timeline">
+          <h3 className="tl-subhead">Major Milestones and Project Events</h3>
+
+          <div className="tl">
             {timelineEvents.map((event, index) => (
-              <div
-                key={`${event.date}-${index}`}
-                className={`timeline-item ${
-                  event.isComplete ? 'timeline-item-complete' : 'timeline-item-incomplete'
-                }`}
-              >
-                <div className="timeline-content">
-                  <span className="timeline-date">{event.date}</span>
-                  <p>{event.description}</p>
+              <div className="tl-row" key={`${event.date}-${index}`}>
+                <span className="tl-pill">{event.date}</span>
+                <div className="tl-combo">
+                  <div className="tl-media">
+                    {event.image ? (
+                      <img src={event.image} alt={event.title.replace(/\.$/, '')} />
+                    ) : (
+                      <div className="tl-media-ph" aria-hidden="true">
+                        <span className="tl-media-icon">📷</span>
+                        <span className="tl-media-note">Photo</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="tl-caption">
+                    <p>
+                      <strong>{event.title}</strong> {event.description}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
@@ -181,193 +224,195 @@ export default function AboutPageV2() {
         </div>
       </section>
       <style jsx>{`
-        .timeline {
-          position: relative;
-          margin: 3rem auto 0;
-          padding: 2rem 0;
-          display: flex;
-          flex-direction: column;
-          gap: 2rem;
+        .tl-subhead {
+          text-align: center;
+          margin: 2.5rem 0 0;
+          color: #111;
+          font-size: 1.4rem;
+          font-weight: 700;
         }
 
-        .timeline::before {
+        .tl {
+          position: relative;
+          max-width: 940px;
+          margin: 1rem auto 0;
+          padding: 1.5rem 0 1rem;
+        }
+
+        /* oblong: elongated capsule outline running the length of the timeline */
+        .tl::before {
           content: '';
           position: absolute;
           top: 0;
           bottom: 0;
-          left: 24px;
-          width: 2px;
-          background: #d1d5db;
+          left: 50%;
+          width: 38px;
+          transform: translateX(-50%);
+          border: 4px solid #1c3f9c;
+          border-radius: 19px;
+          z-index: 0;
         }
 
-        .timeline-label {
+        .tl-row {
           position: relative;
-          padding-left: 64px;
-          font-weight: 600;
-          color: #2563eb;
-          letter-spacing: 0.1em;
-          text-transform: uppercase;
-          font-size: 0.8rem;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          min-height: 336px;
         }
 
-        .timeline-label-start {
-          margin-top: -1rem;
+        /* interleave the alternating sides into a zigzag */
+        .tl-row + .tl-row {
+          margin-top: -104px;
         }
 
-        .timeline-label-end {
-          margin-bottom: -1rem;
+        .tl-row:last-child {
+          min-height: 232px;
         }
 
-        .timeline-label::before {
-          content: '';
-          position: absolute;
-          left: 17px;
-          top: 50%;
-          width: 18px;
-          height: 18px;
+        /* image + writeup travel together, alternating sides of the oblong */
+        .tl-combo {
+          grid-column: 1;
+          justify-self: end;
+          margin-right: 24px;
+          width: min(380px, 100%);
+          display: flex;
+          flex-direction: column;
+          gap: 0.95rem;
+          z-index: 1;
+        }
+
+        .tl-row:nth-child(even) .tl-combo {
+          grid-column: 2;
+          justify-self: start;
+          margin-right: 0;
+          margin-left: 24px;
+        }
+
+        .tl-media {
+          width: 200px;
+          height: 200px;
+          align-self: flex-end;
+        }
+
+        .tl-row:nth-child(even) .tl-media {
+          align-self: flex-start;
+        }
+
+        /* every image is clipped to the same circle, whatever its source ratio */
+        .tl-media img,
+        .tl-media-ph {
+          width: 100%;
+          height: 100%;
           border-radius: 50%;
-          background: #fff;
-          border: 2px solid #2563eb;
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-          transform: translateY(-50%);
+          object-fit: cover;
+          box-shadow: 0 0 0 4px #cfe0f7;
         }
 
-        .timeline-label-complete::before {
-          background: #2563eb;
+        .tl-media-ph {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 0.3rem;
+          background: #e8eff9;
+          color: #7f9bc4;
         }
 
-        .timeline-label-incomplete::before {
-          background: #fff;
+        .tl-media-icon {
+          font-size: 2rem;
+          line-height: 1;
         }
 
-        .timeline-item {
-          position: relative;
-          padding-left: 64px;
-        }
-
-        .timeline-item::before {
-          content: '';
-          position: absolute;
-          top: 1.25rem;
-          left: 18px;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          background: #fff;
-          border: 2px solid #2563eb;
-          box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.15);
-        }
-
-        .timeline-item:last-of-type {
-          margin-bottom: 0;
-        }
-
-        .timeline-item-complete::before {
-          background: #2563eb;
-        }
-
-        .timeline-item-incomplete::before {
-          background: #fff;
-        }
-
-        .timeline-content {
-          background: #fff;
-          border-radius: 0.75rem;
-          padding: 1.25rem 1.5rem;
-          border: 1px solid #e5e7eb;
-          box-shadow: 0 20px 45px -25px rgba(17, 24, 39, 0.4);
-        }
-
-        .timeline-date {
-          display: block;
-          font-weight: 600;
+        .tl-media-note {
+          font-size: 0.72rem;
+          letter-spacing: 0.04em;
           text-transform: uppercase;
-          font-size: 0.85rem;
-          letter-spacing: 0.08em;
-          color: #2563eb;
-          margin-bottom: 0.5rem;
         }
 
-        .timeline-content p {
+        .tl-caption p {
           margin: 0;
-          color: #4b5563;
-          line-height: 1.6;
+          color: #000;
+          line-height: 1.55;
+          font-size: 0.95rem;
         }
 
-        @media (max-width: 576px) {
-          .timeline {
-            gap: 1.75rem;
-          }
-
-          .timeline::before {
-            left: 18px;
-          }
-
-          .timeline-label,
-          .timeline-item {
-            padding-left: 56px;
-          }
-
-          .timeline-label::before {
-            left: 11px;
-          }
-
-          .timeline-item::before {
-            left: 12px;
-          }
+        .tl-caption strong {
+          color: #000;
+          font-weight: 700;
         }
 
-        @media (prefers-color-scheme: dark) {
-          .timeline::before {
-            background: #374151;
+        /* date pill sits on the oblong, offset toward the writeup side */
+        .tl-pill {
+          position: absolute;
+          top: 100px;
+          left: 50%;
+          z-index: 2;
+          white-space: nowrap;
+          background: #2456c8;
+          color: #fff;
+          border-radius: 999px;
+          padding: 0.42rem 1.15rem;
+          font-size: 0.82rem;
+          font-weight: 600;
+        }
+
+        .tl-row:nth-child(odd) .tl-pill {
+          transform: translateX(-24%);
+        }
+
+        .tl-row:nth-child(even) .tl-pill {
+          transform: translateX(-76%);
+        }
+
+        @media (max-width: 768px) {
+          .tl {
+            max-width: 480px;
+            padding: 1.75rem 0;
           }
 
-          .timeline-label {
-            color: #60a5fa;
+          .tl::before {
+            left: 14px;
+            width: 28px;
+            border-radius: 14px;
+            transform: none;
           }
 
-          .timeline-label::before {
-            background: #111827;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.15);
+          .tl-row,
+          .tl-row:last-child {
+            grid-template-columns: 1fr;
+            min-height: 0;
+            margin-bottom: 2.25rem;
+            padding-left: 46px;
           }
 
-          .timeline-label-complete::before {
-            background: #60a5fa;
+          .tl-row + .tl-row {
+            margin-top: 0;
           }
 
-          .timeline-label-incomplete::before {
-            background: #fff;
+          .tl-combo,
+          .tl-row:nth-child(even) .tl-combo {
+            grid-column: 1;
+            justify-self: start;
+            margin: 0;
+            width: 100%;
           }
 
-          .timeline-content {
-            background: #111827;
-            border-color: #1f2937;
-            box-shadow: 0 20px 45px -25px rgba(15, 23, 42, 0.9);
+          .tl-media,
+          .tl-row:nth-child(even) .tl-media {
+            align-self: flex-start;
+            width: 132px;
+            height: 132px;
           }
 
-          .timeline-content p {
-            color: #d1d5db;
+          .tl-pill,
+          .tl-row:nth-child(odd) .tl-pill,
+          .tl-row:nth-child(even) .tl-pill {
+            position: static;
+            transform: none;
+            justify-self: start;
+            align-self: flex-start;
+            margin: 0 0 0.9rem;
           }
-
-          .timeline-date {
-            color: #60a5fa;
-          }
-
-          .timeline-item::before {
-            background: #111827;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 4px rgba(96, 165, 250, 0.2);
-          }
-
-          .timeline-item-complete::before {
-            background: #60a5fa;
-          }
-
-          .timeline-item-incomplete::before {
-            background: #fff;
-          }
-
         }
       `}</style>
     </Layout>
