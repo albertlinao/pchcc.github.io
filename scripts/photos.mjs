@@ -94,15 +94,43 @@ if (missing.length > 0) {
   );
 }
 
-// A folder is expanded to the images inside it, so no glob is needed — and no
-// shell gets a chance to mangle one.
-const inputs = args.flatMap((arg) =>
-  statSync(arg).isDirectory()
-    ? readdirSync(arg)
-        .filter((f) => IMAGE.test(f))
-        .map((f) => join(arg, f))
-    : [arg],
-);
+/**
+ * Turn one argument into a list of image paths. A folder is expanded to the
+ * images inside it, so no glob is needed and no shell gets to mangle one.
+ *
+ * Reading the filesystem can fail for reasons that have nothing to do with the
+ * path being wrong — on macOS, Desktop, Documents and Downloads are protected,
+ * and a terminal without permission can see a folder but not list it. Those
+ * deserve an explanation rather than a stack trace.
+ */
+function imagesIn(arg) {
+  try {
+    if (!statSync(arg).isDirectory()) return [arg];
+    return readdirSync(arg)
+      .filter((f) => IMAGE.test(f))
+      .map((f) => join(arg, f));
+  } catch (error) {
+    if (error.code === 'EPERM' || error.code === 'EACCES') {
+      die(
+        `Not allowed to read ${arg}.`,
+        '',
+        'On macOS the Desktop, Documents and Downloads folders are protected,',
+        'and a terminal without permission can see a folder but not list it.',
+        '',
+        'Either move the photos somewhere unprotected:',
+        '',
+        `  mv ${arg} ~/${basename(arg)}`,
+        `  npm run photos -- ~/${basename(arg)}`,
+        '',
+        'or grant access in System Settings > Privacy & Security > Files and',
+        'Folders, then restart the terminal.',
+      );
+    }
+    die(`Could not read ${arg}: ${error.message}`);
+  }
+}
+
+const inputs = args.flatMap(imagesIn);
 
 const notImages = inputs.filter((f) => !IMAGE.test(f));
 if (notImages.length > 0) {
