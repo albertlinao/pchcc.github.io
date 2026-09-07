@@ -1,126 +1,107 @@
 /**
- * Timeline content for the About page.
+ * Timeline content for the About page: the prose.
  *
- * Each event renders as a card in the order: media, date, caption.
+ * Photos live in content/timeline-media.mjs, which `npm run photos` writes.
+ * They are attached below by matching the event's date, so adding a photo
+ * never means editing this file.
  *
- * `media` holds zero or more images/videos. An empty array (or a missing
- * one) renders the camera placeholder, so an event can ship before its
- * photos exist. Items are shown in the order listed; the first is the
- * thumbnail on the page and the rest are reachable in the viewer.
- *
- *   media: [
- *     { src: '/images/timeline/groundbreaking-01.jpg', alt: 'Ceremonial shovels' },
- *     { src: '/videos/groundbreaking.mp4',
- *       poster: '/images/timeline/groundbreaking-still.jpg',
- *       alt: 'Groundbreaking ceremony' },
- *   ]
- *
- * `type` is inferred from the file extension (.mp4/.webm/.ogv/.mov are
- * video) and only needs setting for URLs without one.
- *
- * `alt` describes the picture for screen readers and for anyone whose
- * images fail to load. Say what is in the frame, not "photo of".
- *
- * `objectPosition` (any CSS object-position value, e.g. 'left center' or
- * '50% 30%') shifts what the round thumbnail shows. Wide frames get
- * centre-cropped to a square, so reach for this when the middle is the wrong
- * part of the picture. The viewer is unaffected — it shows the whole frame.
+ * Each event renders as a card in the order: media, date, caption. An event
+ * with no photos shows the camera placeholder, so it can ship before its
+ * pictures exist.
  */
 
-export const TIMELINE_EVENTS = [
+import TIMELINE_MEDIA from '../content/timeline-media.mjs';
+
+const EVENTS = [
   {
     date: '13 January 2025',
     title: 'Contract Signing.',
     description:
       'The ceremonial contract signing for the Pasig City Hall complex marked the official start of one of the city’s most significant infrastructure projects.',
-    media: [],
   },
   {
     date: 'February 2025',
     title: 'Demolition of the Old Pasig City Hall.',
     description:
       'The demolition of the old Pasig City Hall marked the first major step in preparing the site for the construction of a new government complex designed to serve future generations of Pasigueños.',
-    media: [],
   },
   {
     date: '15 October 2025',
     title: 'Groundbreaking and Capsule-Laying.',
     description:
       'The groundbreaking and capsule-laying ceremony marked the official start of construction for the new Pasig City Hall Complex, reflecting Pasig City’s commitment to a smarter, greener, and people-centered future.',
-    media: [
-      {
-        src: '/images/timeline/2025-10-groundbreaking.jpg',
-        thumb: '/images/timeline/2025-10-groundbreaking-thumb.jpg',
-        alt: 'Officials in hard hats standing with ceremonial shovels at the groundbreaking',
-      },
-      {
-        src: '/images/timeline/2025-10-planning.jpg',
-        thumb: '/images/timeline/2025-10-planning-thumb.jpg',
-        alt: 'Guests crowding around the scale model of the new city hall to photograph it',
-      },
-      {
-        src: '/images/timeline/2025-10-aerial.jpg',
-        thumb: '/images/timeline/2025-10-aerial-thumb.jpg',
-        alt: 'Aerial view of the cleared site with piling rigs and cranes at work',
-      },
-      {
-        src: '/images/timeline/2025-10-capsule.jpg',
-        thumb: '/images/timeline/2025-10-capsule-thumb.jpg',
-        alt: 'Officials gathered around the pit for the time capsule laying',
-      },
-    ],
   },
   {
     date: 'November 2025',
     title: 'Foundation Works Begin.',
     description:
       'Foundation works commenced as the project moved from planning to construction. Structural works began, laying the groundwork for the future City Hall complex.',
-    media: [
-      {
-        src: '/images/timeline/2025-11-structural.jpg',
-        thumb: '/images/timeline/2025-11-structural-thumb.jpg',
-        alt: 'Workers guiding a steel reinforcement cage into place as structural works begin',
-      },
-    ],
   },
   {
     date: 'December 2025',
     title: 'The Structure Begins to Take Shape.',
     description:
       'As construction progressed, the building’s structural framework began to emerge, signaling steady progress on site and bringing the project’s vision closer to reality.',
-    media: [],
   },
   {
     date: '14 February 2026',
     title: 'First Concrete Pour.',
     description:
       'The ceremonial first concrete pour marked the start of major construction activities for the new Pasig City Hall Complex, laying the foundation for a modern and future-ready government center for Pasigueños.',
-    media: [],
   },
   {
     date: 'March 2026',
     title: 'Structural Works Continue.',
     description:
       'Structural works continued across multiple levels, maintaining construction momentum, and advancing the development of the new City Hall.',
-    media: [],
   },
   {
     date: 'April 2026',
     title: 'Structural Works and Slab Concreting.',
     description:
       'Construction activities continued with structural works and slab concreting, bringing the project closer to the completion of its primary structural framework.',
-    media: [],
   },
   {
     date: '15 June 2026',
     title: 'Topping Off.',
     description:
       'The project reached a major milestone with the topping-off ceremony, marking the completion of the building’s primary structural framework and the transition to the next phase of construction.',
-    media: [],
   },
 ];
 
+const MEDIA_DIR = '/images/timeline';
 const VIDEO_PATTERN = /\.(mp4|webm|ogv|mov)(\?.*)?$/i;
+const MONTHS = [
+  'january', 'february', 'march', 'april', 'may', 'june',
+  'july', 'august', 'september', 'october', 'november', 'december',
+];
+
+/**
+ * An event date as 'YYYY-MM', which is what a photo's filename starts with.
+ * '15 October 2025' and 'November 2025' both parse; anything else returns
+ * null rather than guessing.
+ */
+export function eventMonth(date) {
+  const year = date.match(/\b(20\d{2})\b/);
+  const month = MONTHS.findIndex((m) => date.toLowerCase().includes(m));
+  if (year === null || month === -1) return null;
+  return `${year[1]}-${String(month + 1).padStart(2, '0')}`;
+}
+
+/** A photo entry from content/ turned into what the component renders. */
+function toMediaItem(entry) {
+  return {
+    src: `${MEDIA_DIR}/${entry.file}.jpg`,
+    thumb: `${MEDIA_DIR}/${entry.file}-thumb.jpg`,
+    alt: entry.alt,
+    ...(entry.objectPosition ? { objectPosition: entry.objectPosition } : {}),
+  };
+}
+
+export const TIMELINE_EVENTS = EVENTS.map((event) => ({
+  ...event,
+  media: (TIMELINE_MEDIA[event.date] ?? []).map(toMediaItem),
+}));
 
 /** 'video' or 'image', from an explicit `type` or the file extension. */
 export function mediaKind(item) {

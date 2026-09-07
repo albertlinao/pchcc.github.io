@@ -12,7 +12,8 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { TIMELINE_EVENTS, mediaKind, mediaOf } from '../components/timelineEvents.mjs';
+import { TIMELINE_EVENTS, eventMonth, mediaKind, mediaOf } from '../components/timelineEvents.mjs';
+import TIMELINE_MEDIA from '../content/timeline-media.mjs';
 
 const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const component = readFileSync(join(REPO, 'components/Timeline.js'), 'utf8');
@@ -69,6 +70,25 @@ test('media items are usable: a src, and an alt on every image', () => {
   }
 });
 
+test('every photo is filed under a real event', () => {
+  // `npm run photos` keys this file by event date. A key that matches nothing
+  // means a photo silently disappears from the page.
+  const dates = new Set(TIMELINE_EVENTS.map((e) => e.date));
+  const orphans = Object.keys(TIMELINE_MEDIA).filter((d) => !dates.has(d));
+  assert.deepEqual(
+    orphans,
+    [],
+    `these keys in content/timeline-media.mjs match no event: ${orphans.join(', ')}`,
+  );
+});
+
+test('every event date can be matched to a photo filename', () => {
+  // Photos are filed by the YYYY-MM at the front of their name. An event whose
+  // date does not parse could never receive one.
+  const unparsed = TIMELINE_EVENTS.filter((e) => eventMonth(e.date) === null).map((e) => e.date);
+  assert.deepEqual(unparsed, [], `these dates do not parse to a month: ${unparsed.join(', ')}`);
+});
+
 test('every media file referenced actually exists', () => {
   // A typo or a photo that was never committed would otherwise reach the
   // client as a broken image on staging, which is worse than a placeholder.
@@ -89,7 +109,7 @@ test('every media file referenced actually exists', () => {
 
 test('timeline photos are web-sized', () => {
   // The originals arrive as multi-megabyte PNGs from a video editor. Run
-  // `npm run images` and commit what it writes; committing an original would
+  // `npm run photos` and commit what it writes; committing an original would
   // put a 10 MB download on the About page.
   const dir = join(REPO, 'public/images/timeline');
   const oversized = readdirSync(dir)
@@ -99,7 +119,7 @@ test('timeline photos are web-sized', () => {
   assert.deepEqual(
     oversized,
     [],
-    'these are too big, or not JPEG — run `npm run images`:\n  ' + oversized.join('\n  '),
+    'these are too big, or not JPEG — run `npm run photos`:\n  ' + oversized.join('\n  '),
   );
 });
 

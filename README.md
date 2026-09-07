@@ -107,40 +107,46 @@ clicking opens a viewer — arrow keys step, `Esc` closes, thumbnails jump.
 
 ### Adding new photos
 
-Originals from the client are usually multi-megabyte PNGs exported from a
-video editor — several thousand pixels wide. PNG is lossless and meant for
-flat graphics; for photographs it produces files an order of magnitude
-larger than JPEG at no visible benefit. The first batch was 30 MB for five
-frames, which would have been a 30 MB download on the About page.
-
-Do not commit originals. Point the script at them wherever they are:
-
 ```bash
-npm run images -- ~/Downloads/*.png
+npm run photos -- ~/Downloads/*.png
 ```
 
-With no arguments it reads `originals/timeline/`, which is git-ignored. It
-prints the `media` entries to paste into `components/timelineEvents.mjs`, so
-filenames do not have to be retyped — that is where typos come from.
+That is the whole thing. For each photo it writes two web-sized JPEGs into
+`public/images/timeline/` and records it in `content/timeline-media.mjs`,
+working out which event it belongs to from the date at the front of the
+filename — so name files `YYYY-MM-something` and nothing has to be matched
+up by hand. Then fill in the `alt` text it left blank, and:
 
-That writes two JPEGs per original into `public/images/timeline/`:
+```bash
+npm run publish
+```
+
+which builds, copies the export into `docs/`, and runs the tests. Commit
+what changed.
+
+Originals never enter the repo. Keep them wherever you like — the script
+reads them in place, and only the JPEGs it writes are served.
 
 | output | used by | size |
 | --- | --- | --- |
 | `<name>.jpg` | the viewer, up to 1920px wide | ~200 KB |
 | `<name>-thumb.jpg` | the round card, 600×600 square | ~55 KB |
 
-The first batch came out 23× smaller, and the About page now downloads
-about 110 KB of timeline imagery instead of 30 MB. `npm test` fails if
-anything in that directory is over 500 KB or is not a JPEG, and if a photo
-has no `thumb` — without one the 200px card downloads the full-size image.
+The first batch came out 23× smaller: the About page downloads about 110 KB
+of timeline imagery instead of 30 MB. `npm test` fails if anything in that
+directory is over 500 KB or is not a JPEG, if a photo has no thumbnail, or
+if any `alt` is still blank.
+
+The script refuses rather than guesses. A photo whose month has no event, or
+whose name has no date, stops the run and changes nothing — it tells you
+which file and why.
 
 Thumbnails are square because the card is a circle. `object-fit: cover` can
 only slide a wide frame horizontally — its full height always shows — so an
 image with a caption burned across the bottom needs a real crop to exclude
-it. `THUMB_CROP` in `scripts/optimize-timeline-images.mjs` takes that crop
-as fractions of the original, for the few frames that need it. The viewer
-is unaffected and always shows the whole frame.
+it. Add `crop` to that photo's entry in `content/timeline-media.mjs` as
+fractions of the frame and re-run `npm run photos`. The viewer is unaffected
+and always shows the whole frame.
 
 ### The client's frames
 
