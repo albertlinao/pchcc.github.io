@@ -26,7 +26,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { basename, join, parse } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { TIMELINE_EVENTS, eventMonth } from '../components/timelineEvents.mjs';
+import { TIMELINE_EVENTS, eventMonth, filenameMonth } from '../components/timelineEvents.mjs';
 
 const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '..');
 const TARGET = join(REPO, 'public', 'images', 'timeline');
@@ -142,6 +142,11 @@ if (inputs.length === 0) die(`No images found in ${args.join(', ')}.`);
 // Which event does each photo belong to?
 // ---------------------------------------------------------------------------
 
+const existingMedia = (await import(pathToFileURL(DATA).href)).default;
+const existingCounts = new Map(
+  Object.entries(existingMedia).map(([date, items]) => [date, items.length]),
+);
+
 const eventsByMonth = new Map();
 for (const event of TIMELINE_EVENTS) {
   const month = eventMonth(event.date);
@@ -154,29 +159,42 @@ const unplaceable = [];
 
 for (const path of inputs) {
   const { name } = parse(path);
-  const month = name.match(/^(20\d{2})-(0[1-9]|1[0-2])/);
+  const month = filenameMonth(name);
   if (month === null) {
-    unplaceable.push(`${basename(path)} — name it YYYY-MM-something so the event can be worked out`);
+    unplaceable.push(`${basename(path)} — no month and year in the name`);
     continue;
   }
-  const dates = eventsByMonth.get(month[0]) ?? [];
+  const dates = eventsByMonth.get(month) ?? [];
   if (dates.length === 0) {
-    unplaceable.push(`${basename(path)} — no timeline event in ${month[0]}`);
+    unplaceable.push(`${basename(path)} — reads as ${month}, which has no timeline event`);
     continue;
   }
   if (dates.length > 1) {
-    unplaceable.push(`${basename(path)} — ${month[0]} matches several events: ${dates.join(', ')}`);
+    unplaceable.push(`${basename(path)} — ${month} matches several events: ${dates.join(', ')}`);
     continue;
   }
   planned.push({ path, name, date: dates[0] });
 }
 
 if (unplaceable.length > 0) {
+  // Show the timeline, so the month to use is right there rather than in
+  // another file.
+  const calendar = TIMELINE_EVENTS.map((event) => {
+    const month = eventMonth(event.date);
+    const count = (existingCounts.get(event.date) ?? 0);
+    return `  ${month}  ${event.date.padEnd(18)} ${event.title}${count ? ` (${count} already)` : ''}`;
+  });
   die(
     'These photos have nowhere to go:',
     ...unplaceable.map((m) => `  ${m}`),
     '',
-    'Add the event to components/timelineEvents.mjs, or rename the file.',
+    'Names need a month and a year. Any of these work:',
+    '  feb-2025-demolition.png    february-2025-demolition.png    2025-02-demolition.png',
+    '',
+    'The timeline:',
+    ...calendar,
+    '',
+    'Rename the files, or add the missing event to components/timelineEvents.mjs.',
     'Nothing was changed.',
   );
 }
@@ -186,7 +204,7 @@ if (unplaceable.length > 0) {
 // ---------------------------------------------------------------------------
 
 const sharp = await loadSharp();
-const existing = (await import(pathToFileURL(DATA).href)).default;
+const existing = existingMedia;
 /** A crop already recorded for this photo, so re-running keeps it. */
 const cropFor = (file) =>
   Object.values(existing)

@@ -12,7 +12,13 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { TIMELINE_EVENTS, eventMonth, mediaKind, mediaOf } from '../components/timelineEvents.mjs';
+import {
+  TIMELINE_EVENTS,
+  eventMonth,
+  filenameMonth,
+  mediaKind,
+  mediaOf,
+} from '../components/timelineEvents.mjs';
 import TIMELINE_MEDIA from '../content/timeline-media.mjs';
 
 const REPO = join(fileURLToPath(new URL('.', import.meta.url)), '..');
@@ -87,6 +93,27 @@ test('every event date can be matched to a photo filename', () => {
   // date does not parse could never receive one.
   const unparsed = TIMELINE_EVENTS.filter((e) => eventMonth(e.date) === null).map((e) => e.date);
   assert.deepEqual(unparsed, [], `these dates do not parse to a month: ${unparsed.join(', ')}`);
+});
+
+test('a photo filename is read the way people write it', () => {
+  for (const [name, expected] of [
+    ['2025-10-aerial', '2025-10'],
+    ['jan-2025-contract-signing', '2025-01'],
+    ['nov-2025-foundation-begins', '2025-11'],
+    ['june-2026-topping-off', '2026-06'],
+    ['february-2026-pour', '2026-02'],
+    ['sept-2025-x', '2025-09'],
+    // The trailing counter must not be read as a month. Taking the '1' here
+    // would file a March photo under January, quietly, on the wrong event.
+    ['march-2026-1', '2026-03'],
+    ['feb-2026-1', '2026-02'],
+    // Nothing to go on: better to refuse than to guess.
+    ['demolition-1', null],
+    ['site-photo', null],
+    ['2026-1-bad', null],
+  ]) {
+    assert.equal(filenameMonth(name), expected, `filenameMonth('${name}')`);
+  }
 });
 
 test('every media file referenced actually exists', () => {

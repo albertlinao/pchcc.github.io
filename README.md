@@ -114,9 +114,10 @@ npm run photos -- ~/Desktop/pchcc-images     # a folder, files, or a glob
 
 That is the whole thing. For each photo it writes two web-sized JPEGs into
 `public/images/timeline/` and records it in `content/timeline-media.mjs`,
-working out which event it belongs to from the date at the front of the
-filename — so name files `YYYY-MM-something` and nothing has to be matched
-up by hand. Then fill in the `alt` text it left blank, and:
+working out which event it belongs to from the month and year in the
+filename — `jan-2025-contract-signing.png`, `nov-2025-foundation.png` and
+`2026-03-structural.png` all work — so nothing has to be matched up by hand.
+Then fill in the `alt` text it left blank, and:
 
 ```bash
 npm run publish
@@ -139,8 +140,11 @@ directory is over 500 KB or is not a JPEG, if a photo has no thumbnail, or
 if any `alt` is still blank.
 
 The script refuses rather than guesses. A photo whose month has no event, or
-whose name has no date, stops the run and changes nothing — it tells you
-which file and why.
+whose name carries no date, stops the run and changes nothing — it names the
+file, the reason, and prints the timeline with each event's month so the
+right name is obvious. Month *names* only in that position: a bare number
+would make `march-2026-1` ambiguous, and reading its trailing `-1` as
+January would file the photo under the wrong event silently.
 
 Thumbnails are square because the card is a circle. `object-fit: cover` can
 only slide a wide frame horizontally — its full height always shows — so an

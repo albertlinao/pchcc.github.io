@@ -77,9 +77,37 @@ const MONTHS = [
 ];
 
 /**
- * An event date as 'YYYY-MM', which is what a photo's filename starts with.
- * '15 October 2025' and 'November 2025' both parse; anything else returns
- * null rather than guessing.
+ * The month a photo's filename refers to, as 'YYYY-MM'.
+ *
+ * People name files the way they think, so this reads all of
+ * '2025-10-aerial', 'nov-2025-foundation', 'march-2026-1' and
+ * 'june-2026-topping-off'. A leading YYYY-MM wins outright; otherwise it
+ * looks for a year and a month written by name.
+ *
+ * Only month *names* are accepted in that second form. A bare number would
+ * make 'march-2026-1' ambiguous, and reading its trailing '-1' as January
+ * would file the photo under the wrong event without anyone noticing.
+ *
+ * Returns null when there is no date to be found, rather than guessing.
+ */
+export function filenameMonth(name) {
+  const strict = name.match(/^(20\d{2})-(0[1-9]|1[0-2])(?![0-9])/);
+  if (strict !== null) return `${strict[1]}-${strict[2]}`;
+
+  const year = name.match(/\b(20\d{2})\b/);
+  if (year === null) return null;
+
+  const tokens = name.toLowerCase().split(/[^a-z]+/).filter(Boolean);
+  const month = MONTHS.findIndex((m) =>
+    tokens.some((t) => t === m || (t.length >= 3 && m.startsWith(t))),
+  );
+  if (month === -1) return null;
+  return `${year[1]}-${String(month + 1).padStart(2, '0')}`;
+}
+
+/**
+ * An event date as 'YYYY-MM'. '15 October 2025' and 'November 2025' both
+ * parse; anything else returns null rather than guessing.
  */
 export function eventMonth(date) {
   const year = date.match(/\b(20\d{2})\b/);
