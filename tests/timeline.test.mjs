@@ -8,7 +8,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -75,7 +75,7 @@ test('every media file referenced actually exists', () => {
   const missing = [];
   for (const event of TIMELINE_EVENTS) {
     for (const item of mediaOf(event)) {
-      for (const path of [item.src, item.poster].filter((p) => p?.startsWith('/'))) {
+      for (const path of [item.src, item.thumb, item.poster].filter((p) => p?.startsWith('/'))) {
         if (!existsSync(join(REPO, 'public', path))) missing.push(`${event.date}: ${path}`);
       }
     }
@@ -85,6 +85,33 @@ test('every media file referenced actually exists', () => {
     [],
     `these files are referenced but not in public/:\n  ${missing.join('\n  ')}`,
   );
+});
+
+test('timeline photos are web-sized', () => {
+  // The originals arrive as multi-megabyte PNGs from a video editor. Run
+  // `npm run images` and commit what it writes; committing an original would
+  // put a 10 MB download on the About page.
+  const dir = join(REPO, 'public/images/timeline');
+  const oversized = readdirSync(dir)
+    .map((f) => ({ f, size: statSync(join(dir, f)).size }))
+    .filter(({ f, size }) => size > 500 * 1024 || !f.endsWith('.jpg'))
+    .map(({ f, size }) => `${f} (${(size / 1024).toFixed(0)} KB)`);
+  assert.deepEqual(
+    oversized,
+    [],
+    'these are too big, or not JPEG — run `npm run images`:\n  ' + oversized.join('\n  '),
+  );
+});
+
+test('every photo has a small square thumbnail for the card', () => {
+  // Without one the round 200px card downloads the full-size photo.
+  const missing = [];
+  for (const event of TIMELINE_EVENTS) {
+    for (const item of mediaOf(event)) {
+      if (mediaKind(item) === 'image' && !item.thumb) missing.push(`${event.date}: ${item.src}`);
+    }
+  }
+  assert.deepEqual(missing, [], `no thumb, so the card loads the full photo:\n  ${missing.join('\n  ')}`);
 });
 
 test('an event with no media keeps the camera placeholder', () => {

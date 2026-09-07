@@ -105,22 +105,46 @@ clicking opens a viewer — arrow keys step, `Esc` closes, thumbnails jump.
   wider, so `cover` shows only the middle; use this when the middle is the
   wrong part of the picture. The viewer always shows the whole frame.
 
-### Photos still to be added
+### Adding new photos
 
-The client supplied five frames. They are used as delivered — several carry
-burned-in date badges and captions that the round thumbnail crops off, and
-cleaning them up is not ours to do. The full frame is visible in the viewer
-either way, and the date pill already carries the date.
+Originals from the client are usually multi-megabyte PNGs exported from a
+video editor — several thousand pixels wide. PNG is lossless and meant for
+flat graphics; for photographs it produces files an order of magnitude
+larger than JPEG at no visible benefit. The first batch was 30 MB for five
+frames, which would have been a 30 MB download on the About page.
 
-| File to add under `public/images/timeline/` | Event | Notes |
+Do not commit originals. Put them in `originals/timeline/` (git-ignores it)
+and run:
+
+```bash
+npm run images
+```
+
+That writes two JPEGs per original into `public/images/timeline/`:
+
+| output | used by | size |
 | --- | --- | --- |
-| `2025-10-groundbreaking.jpg` | 15 October 2025 | The circular two-panel shovel photo. Already cut round, so it crops best — list it first to make it the thumbnail. |
-| `2025-10-planning.jpg` | 15 October 2025 | Crowd around the scale model, "From planning". |
-| `2025-10-aerial.jpg` | 15 October 2025 | Aerial of the site, "To ground breaking". |
-| `2025-10-capsule.jpg` | 15 October 2025 | Group with shovels, "To capsule laying". |
-| `2025-11-structural.jpg` | November 2025 | Rebar column and workers. Filed by its stamped date, though its caption reads "structural works continue". A split frame, so it wants an `objectPosition` — centre lands on the seam. |
+| `<name>.jpg` | the viewer, up to 1920px wide | ~200 KB |
+| `<name>-thumb.jpg` | the round card, 600×600 square | ~55 KB |
 
-That gives October a four-item gallery and November a single image.
+The first batch came out 23× smaller, and the About page now downloads
+about 110 KB of timeline imagery instead of 30 MB. `npm test` fails if
+anything in that directory is over 500 KB or is not a JPEG, and if a photo
+has no `thumb` — without one the 200px card downloads the full-size image.
+
+Thumbnails are square because the card is a circle. `object-fit: cover` can
+only slide a wide frame horizontally — its full height always shows — so an
+image with a caption burned across the bottom needs a real crop to exclude
+it. `THUMB_CROP` in `scripts/optimize-timeline-images.mjs` takes that crop
+as fractions of the original, for the few frames that need it. The viewer
+is unaffected and always shows the whole frame.
+
+### The client's frames
+
+The photos are used as delivered. Several carry burned-in date badges and
+captions; those are the client's material and not ours to edit. The round
+thumbnail crops most of that away, the viewer shows the whole frame, and
+the date pill carries the date regardless.
 
 The stylesheet is `<style jsx global>` rather than scoped, because
 styled-jsx only scopes the JSX of the component that declares the block —

@@ -523,14 +523,13 @@ function TimelineRow({ event, onOpen, registerTrigger }) {
  */
 function Thumbnail({ item, alt }) {
   const style = item.objectPosition ? { objectPosition: item.objectPosition } : undefined;
-  if (mediaKind(item) === 'video') {
-    return item.poster ? (
-      <img src={item.poster} alt={alt} style={style} />
-    ) : (
-      <video src={item.src} muted playsInline preload="metadata" aria-label={alt} style={style} />
-    );
+  // `thumb` is a small copy for the card. Without one the card would download
+  // the full-size photo to draw it 200px wide, several times over per page.
+  const still = item.thumb ?? (mediaKind(item) === 'video' ? item.poster : item.src);
+  if (still) {
+    return <img src={still} alt={alt} style={style} loading="lazy" decoding="async" />;
   }
-  return <img src={item.src} alt={alt} style={style} />;
+  return <video src={item.src} muted playsInline preload="metadata" aria-label={alt} style={style} />;
 }
 
 function MediaViewer({ event, index, onClose, onStep, onShow }) {

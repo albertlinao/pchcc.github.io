@@ -47,14 +47,41 @@ export const TIMELINE_EVENTS = [
     title: 'Groundbreaking and Capsule-Laying.',
     description:
       'The groundbreaking and capsule-laying ceremony marked the official start of construction for the new Pasig City Hall Complex, reflecting Pasig City’s commitment to a smarter, greener, and people-centered future.',
-    media: [],
+    media: [
+      {
+        src: '/images/timeline/2025-10-groundbreaking.jpg',
+        thumb: '/images/timeline/2025-10-groundbreaking-thumb.jpg',
+        alt: 'Officials in hard hats standing with ceremonial shovels at the groundbreaking',
+      },
+      {
+        src: '/images/timeline/2025-10-planning.jpg',
+        thumb: '/images/timeline/2025-10-planning-thumb.jpg',
+        alt: 'Guests crowding around the scale model of the new city hall to photograph it',
+      },
+      {
+        src: '/images/timeline/2025-10-aerial.jpg',
+        thumb: '/images/timeline/2025-10-aerial-thumb.jpg',
+        alt: 'Aerial view of the cleared site with piling rigs and cranes at work',
+      },
+      {
+        src: '/images/timeline/2025-10-capsule.jpg',
+        thumb: '/images/timeline/2025-10-capsule-thumb.jpg',
+        alt: 'Officials gathered around the pit for the time capsule laying',
+      },
+    ],
   },
   {
     date: 'November 2025',
     title: 'Foundation Works Begin.',
     description:
       'Foundation works commenced as the project moved from planning to construction. Structural works began, laying the groundwork for the future City Hall complex.',
-    media: [],
+    media: [
+      {
+        src: '/images/timeline/2025-11-structural.jpg',
+        thumb: '/images/timeline/2025-11-structural-thumb.jpg',
+        alt: 'Workers guiding a steel reinforcement cage into place as structural works begin',
+      },
+    ],
   },
   {
     date: 'December 2025',
