@@ -1,0 +1,10 @@
+{
+  "name": "pchcc-site-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Navigation tests for the pchcc.com.ph static export in docs/",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs"
+  }
+}
