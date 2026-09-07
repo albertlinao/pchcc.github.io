@@ -293,17 +293,30 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
           flex-direction: column;
           gap: 0.9rem;
         }
+        /* Nothing in the panel shrinks. A flex item that shrinks keeps its
+           own contents at full size, so a shrinking picture does not get
+           smaller — it spills over the controls underneath it. */
+        .tl-modal-stage,
+        .tl-modal-nav-row,
+        .tl-modal-meta,
+        .tl-modal-thumbs {
+          flex: 0 0 auto;
+        }
         .tl-modal-stage {
           position: relative;
           display: flex;
           align-items: center;
           justify-content: center;
-          min-height: 0;
         }
         .tl-modal-stage img,
         .tl-modal-stage video {
           max-width: 100%;
-          max-height: 60vh;
+          /* Sized off the window, leaving room for the close button, the
+             controls, the caption and the thumbnails. A percentage cannot do
+             this: the panel's height is auto, so 100% resolves to none and
+             the picture renders full size. The floor keeps it usable on a
+             very short window, where the panel scrolls instead. */
+          max-height: max(180px, calc(100vh - 330px));
           border-radius: 8px;
           background: #000;
         }
@@ -345,20 +358,19 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
           font-size: 1.4rem;
           line-height: 1;
         }
+        /* A centred pair under the picture. They used to hang off the left
+           and right edges of the stage, which the panel's own overflow then
+           clipped. */
+        .tl-modal-nav-row {
+          display: flex;
+          justify-content: center;
+          gap: 0.6rem;
+        }
         .tl-modal-nav {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
           width: 48px;
           height: 48px;
           font-size: 1.6rem;
           line-height: 1;
-        }
-        .tl-modal-prev {
-          left: -0.5rem;
-        }
-        .tl-modal-next {
-          right: -0.5rem;
         }
         .tl-modal-thumbs {
           display: flex;
@@ -444,14 +456,8 @@ export default function Timeline({ events = TIMELINE_EVENTS }) {
             padding: 1rem;
           }
           .tl-modal-nav {
-            width: 40px;
-            height: 40px;
-          }
-          .tl-modal-prev {
-            left: 0;
-          }
-          .tl-modal-next {
-            right: 0;
+            width: 44px;
+            height: 44px;
           }
         }
         /* timeline.css:end */
@@ -600,17 +606,18 @@ function MediaViewer({ event, index, onClose, onStep, onShow }) {
             <img key={item.src} src={item.src} alt={item.alt ?? label} />
           )}
 
-          {many && (
-            <>
-              <button type="button" className="tl-modal-nav tl-modal-prev" onClick={() => onStep(-1)} aria-label="Previous">
-                ‹
-              </button>
-              <button type="button" className="tl-modal-nav tl-modal-next" onClick={() => onStep(1)} aria-label="Next">
-                ›
-              </button>
-            </>
-          )}
         </div>
+
+        {many && (
+          <div className="tl-modal-nav-row">
+            <button type="button" className="tl-modal-nav" onClick={() => onStep(-1)} aria-label="Previous">
+              ‹
+            </button>
+            <button type="button" className="tl-modal-nav" onClick={() => onStep(1)} aria-label="Next">
+              ›
+            </button>
+          </div>
+        )}
 
         <p className="tl-modal-meta">
           <strong>{label}</strong>

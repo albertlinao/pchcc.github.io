@@ -216,6 +216,36 @@ test('the date connects to the rail with a line and a dot', () => {
   );
 });
 
+test('the viewer controls sit below the picture, not over its edges', () => {
+  const css = built.replace(/\s+/g, '');
+  // They used to hang off the left and right of the stage, where the panel's
+  // own overflow clipped them on desktop.
+  const nav = css.slice(css.indexOf('.tl-modal-nav{'), css.indexOf('}', css.indexOf('.tl-modal-nav{')));
+  assert.ok(!/position:absolute/.test(nav), '.tl-modal-nav is positioned over the picture again');
+  assert.ok(/\.tl-modal-nav-row\{[^}]*justify-content:center/.test(css), 'the controls are not centred');
+  assert.ok(/\.tl-modal-nav-row\{[^}]*gap:/.test(css), 'the two controls have no gap between them');
+});
+
+test('nothing in the viewer shrinks, so the picture cannot cover the controls', () => {
+  // Collapse whitespace rather than strip it: the built CSS is autoprefixed,
+  // and stripping turns `flex: 0 0 auto` into an unreadable `flex:00auto`.
+  const css = built.replace(/\s+/g, ' ');
+  // A shrinking flex item keeps its contents at full size: the picture would
+  // spill over the controls beneath it rather than get smaller.
+  const rows = css.slice(css.indexOf('.tl-modal-stage,'), css.indexOf('}', css.indexOf('.tl-modal-stage,')));
+  assert.ok(rows.includes('.tl-modal-nav-row'), 'the controls row is not in the no-shrink group');
+  assert.ok(rows.includes('.tl-modal-meta'), 'the caption is not in the no-shrink group');
+  assert.ok(rows.includes('.tl-modal-thumbs'), 'the thumbnails are not in the no-shrink group');
+  assert.ok(/flex: ?0 ?0 ?auto/.test(rows), 'the viewer rows can shrink again');
+  // A percentage cannot bound the picture here — the panel's height is auto,
+  // so it resolves to none and the picture renders full size.
+  const at = css.indexOf('.tl-modal-stage img');
+  assert.notEqual(at, -1, 'the picture rule is missing');
+  const img = css.slice(at, css.indexOf('}', at));
+  assert.ok(/max-height: ?max\(/.test(img), 'the picture is not sized off the window');
+  assert.ok(!/max-height: ?100%/.test(img), 'the picture uses a percentage height, which resolves to none');
+});
+
 test('the built page ships the viewer stylesheet', () => {
   assert.ok(built.includes('.tl-modal'), 'the media viewer styles were not built');
 });
